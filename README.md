@@ -1,4 +1,4 @@
-# TrustGraph
+# TrustGraph (AI Yogen Hackathon)
 
 Portable, evidence-backed reputation profiles — the trust layer of the internet.
 
