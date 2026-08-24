@@ -36,7 +36,7 @@ export function RecruiterSearchFiltersPanel({ filters, onChange }: Props) {
           onChange={(e) =>
             onChange({
               ...filters,
-              discovery_source: e.target.value === "all" ? undefined : e.target.value,
+              discovery_source: (e.target.value === "all" ? undefined : e.target.value) as "indexed" | "web" | undefined,
             })
           }
         >

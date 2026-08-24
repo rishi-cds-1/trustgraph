@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Copy, ExternalLink, GitHub, Search, Star } from "lucide-react";
+import { Code, Copy, ExternalLink, Search, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { brand, routes } from "@/constants";
@@ -86,7 +86,7 @@ export function CandidateActionBar({
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-semibold text-ink hover:border-teal/40"
       >
-        <GitHub className="h-3.5 w-3.5" />
+        <Code className="h-3.5 w-3.5" />
         GitHub
       </a>
     </div>
