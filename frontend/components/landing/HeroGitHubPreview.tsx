@@ -83,8 +83,14 @@ export function HeroGitHubPreview() {
 
   async function handleLookup(e?: FormEvent) {
     e?.preventDefault();
-    const query = username.trim();
+    let query = username.trim();
     if (!query) return;
+
+    // Extract username from GitHub URL if pasted
+    const urlMatch = query.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([^/?#]+)/i);
+    if (urlMatch) {
+      query = urlMatch[1];
+    }
 
     setLoading(true);
     setError("");
@@ -135,7 +141,15 @@ export function HeroGitHubPreview() {
           <Search className="h-5 w-5 shrink-0 text-[#6B7280]" />
           <input
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              let value = e.target.value;
+              // Extract username from GitHub URL if pasted
+              const urlMatch = value.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([^/?#]+)/i);
+              if (urlMatch) {
+                value = urlMatch[1];
+              }
+              setUsername(value);
+            }}
             aria-label={lookup.searchAria}
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#9CA3AF] sm:text-base md:text-lg"
             placeholder={searchPlaceholder}
