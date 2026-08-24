@@ -39,7 +39,7 @@ func EnrichFromClerk(ctx context.Context, store *repository.Store, github GitHub
 	}
 
 	if accounts.LinkedInUsername != "" && !hasSource(profile, "linkedin") {
-		profilesync.ApplyLinkedIn(profile, accounts.LinkedInUsername, accounts.LinkedInName)
+		profilesync.ApplyLinkedIn(profile, accounts.LinkedInUsername, accounts.LinkedInName, true)
 	}
 
 	profilesync.FinalizeProfileMetrics(profile)

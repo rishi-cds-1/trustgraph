@@ -131,40 +131,29 @@ func (a *API) ConnectLinkedIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.store.FindUserByID(r.Context(), userID)
-	if err != nil || user.ClerkID == "" {
-		writeError(w, http.StatusBadRequest, "clerk account required to connect linkedin")
-		return
+	// Clerk lookup is best-effort: an OAuth-linked account proves ownership, but a
+	// user may instead just supply their public profile URL.
+	var accounts clerkaccounts.LinkedAccounts
+	if user, err := a.store.FindUserByID(r.Context(), userID); err == nil && user.ClerkID != "" {
+		if clerkUser, err := clerkuser.Get(r.Context(), user.ClerkID); err == nil {
+			accounts = clerkaccounts.Parse(clerkUser)
+		}
 	}
 
-	clerkUser, err := clerkuser.Get(r.Context(), user.ClerkID)
-	if err != nil {
-		writeError(w, http.StatusBadGateway, "could not fetch clerk user")
-		return
-	}
-
-	accounts := clerkaccounts.Parse(clerkUser)
+	// Prefer the OAuth-proven slug; fall back to whatever the user typed.
 	slug := accounts.LinkedInUsername
+	verified := slug != "" && accounts.LinkedInLinked
 	if slug == "" {
 		slug = clerkaccounts.NormalizeLinkedInSlug(req.Username)
 	}
 
 	if slug == "" {
-		if accounts.LinkedInLinked {
-			writeError(w, http.StatusBadRequest, "linkedin is linked in clerk — enter your linkedin.com/in/ profile slug and sync again")
-			return
-		}
-		writeError(w, http.StatusBadRequest, "linkedin not connected in clerk — use Connect with LinkedIn first, then sync")
-		return
-	}
-
-	if !accounts.LinkedInLinked {
-		writeError(w, http.StatusBadRequest, "link linkedin in clerk first via Connect with LinkedIn, then sync")
+		writeError(w, http.StatusBadRequest, "enter your linkedin.com/in/ profile URL or slug, or use Connect with LinkedIn")
 		return
 	}
 
 	previous := profile.TrustScore.Overall
-	profilesync.ApplyLinkedIn(profile, slug, accounts.LinkedInName)
+	profilesync.ApplyLinkedIn(profile, slug, accounts.LinkedInName, verified)
 	profilesync.FinalizeProfileMetrics(profile)
 
 	if err := a.store.UpdateProfile(r.Context(), profile); err != nil {

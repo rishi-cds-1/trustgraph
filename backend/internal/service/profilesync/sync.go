@@ -346,6 +346,16 @@ func upsertSource(sources []models.DataSource, source models.DataSource) []model
 	return append(sources, source)
 }
 
+func upsertSocialLink(links []models.SocialLink, link models.SocialLink) []models.SocialLink {
+	for i, l := range links {
+		if l.Platform == link.Platform {
+			links[i] = link
+			return links
+		}
+	}
+	return append(links, link)
+}
+
 func removePlatformEvidence(items []models.EvidenceItem, platform string) []models.EvidenceItem {
 	out := make([]models.EvidenceItem, 0, len(items))
 	for _, item := range items {
@@ -480,7 +490,10 @@ func truncateText(s string, max int) string {
 	return strings.TrimSpace(s[:max-1]) + "…"
 }
 
-func ApplyLinkedIn(profile *models.Profile, username, displayName string) {
+// ApplyLinkedIn records a LinkedIn identity. verified distinguishes an
+// OAuth-proven account from a self-declared profile URL, which nobody has
+// proven ownership of and which therefore carries less scoring weight.
+func ApplyLinkedIn(profile *models.Profile, username, displayName string, verified bool) {
 	now := time.Now().UTC()
 	profile.DataSources = upsertSource(profile.DataSources, models.DataSource{
 		Platform:    "linkedin",
@@ -488,15 +501,26 @@ func ApplyLinkedIn(profile *models.Profile, username, displayName string) {
 		Connected:   true,
 		ConnectedAt: now,
 	})
+	title := "LinkedIn profile linked (self-declared, unverified)"
+	if verified {
+		title = "LinkedIn identity verified via Clerk"
+	}
+	url := fmt.Sprintf("https://linkedin.com/in/%s", username)
 	profile.Evidence = removePlatformEvidence(profile.Evidence, "linkedin")
 	profile.Evidence = append(profile.Evidence, models.EvidenceItem{
 		Type:       "social_identity",
-		Title:      "LinkedIn identity verified via Clerk",
+		Title:      title,
 		Platform:   "linkedin",
-		Verified:   true,
+		Verified:   verified,
 		Count:      1,
-		URL:        fmt.Sprintf("https://linkedin.com/in/%s", username),
+		URL:        url,
 		OccurredAt: now,
+	})
+	// Surface the URL to the enrichment pipeline, which scrapes public pages
+	// (Firecrawl/Tavily) to derive career evidence without OAuth.
+	profile.SocialLinks = upsertSocialLink(profile.SocialLinks, models.SocialLink{
+		Platform: "linkedin",
+		URL:      url,
 	})
 	if displayName != "" && profile.DisplayName == "" {
 		profile.DisplayName = displayName

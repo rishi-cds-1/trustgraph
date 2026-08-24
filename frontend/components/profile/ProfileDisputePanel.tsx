@@ -66,7 +66,10 @@ export function ProfileDisputePanel({
 
           {!isSignedIn ? (
             <p className="mt-4 text-sm">
-              <a href={routes.signIn} className="font-medium text-teal hover:underline">
+              <a
+                href={routes.signInReturningTo(routes.sampleProfile(handle))}
+                className="font-medium text-teal hover:underline"
+              >
                 {profileCopy.dispute.signInCta}
               </a>
             </p>

@@ -3,10 +3,8 @@
 import { useAuth } from "@clerk/nextjs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { routes } from "@/constants";
+import { AUTH_PAGES, RETURN_TO_PARAM, routes, safeReturnTo } from "@/constants";
 import { syncAccount } from "@/lib/sync-account";
-
-const AUTH_PAGES = new Set([routes.signIn, routes.signUp, routes.signup, "/signup"]);
 
 function onboardingDestination(user: NonNullable<Awaited<ReturnType<typeof syncAccount>>["user"]>, profileStep: number) {
   if (user.account_type === "recruiter") {
@@ -43,7 +41,11 @@ export function ClerkUserSync() {
             : routes.dashboard;
 
         if (AUTH_PAGES.has(pathname)) {
-          router.replace(destination);
+          // Onboarding is still mandatory; otherwise honour where the user came from.
+          const returnTo = safeReturnTo(searchParams.get(RETURN_TO_PARAM));
+          const isOnboarding =
+            destination === routes.onboarding || destination === routes.recruiterOnboarding;
+          router.replace(!isOnboarding && returnTo ? returnTo : destination);
           return;
         }
 

@@ -14,7 +14,23 @@ export const routes = {
   docs: "/docs",
   sampleProfile: (handle: string) => `/${handle}`,
   claimSignup: (handle: string) => `/sign-up?claim=${handle}`,
+  signInReturningTo: (returnTo: string | null | undefined) => {
+    const target = safeReturnTo(returnTo);
+    return target && !AUTH_PAGES.has(target)
+      ? `/sign-in?${RETURN_TO_PARAM}=${encodeURIComponent(target)}`
+      : "/sign-in";
+  },
 } as const;
+
+export const RETURN_TO_PARAM = "redirect_url";
+
+export const AUTH_PAGES = new Set(["/sign-in", "/sign-up", "/signup", "/login"]);
+
+/** Rejects absolute/protocol-relative URLs so the param cannot drive an open redirect. */
+export function safeReturnTo(value: string | null | undefined): string | null {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
 
 /** App routes that must not be treated as profile handles. */
 export const reservedHandles = new Set([

@@ -146,7 +146,7 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
             </BentoBlock>
           )}
 
-          {!isAuthenticatedView && <BentoTeaserCta />}
+          {!isAuthenticatedView && <BentoTeaserCta handle={profile.handle} />}
 
           {isAuthenticatedView && profile.timeline && profile.timeline.length > 0 && (
             <BentoTimeline events={profile.timeline} />

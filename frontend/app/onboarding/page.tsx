@@ -81,6 +81,11 @@ function OnboardingContent() {
     profile?.data_sources?.some((s) => s.platform === "linkedin" && s.connected),
   );
   const linkedInHandle = profile?.data_sources?.find((s) => s.platform === "linkedin")?.external_id;
+  const linkedInVerified = Boolean(
+    profile?.evidence?.some(
+      (e) => e.platform === "linkedin" && e.type === "social_identity" && e.verified,
+    ),
+  );
 
   useEffect(() => {
     const gh = searchParams.get("github");
@@ -527,6 +532,7 @@ function OnboardingContent() {
                 hasDevpost={hasDevpost}
                 hasDevfolio={hasDevfolio}
                 linkedInHandle={linkedInHandle}
+                linkedInVerified={linkedInVerified}
                 linkedinSlug={linkedinSlug}
                 setLinkedinSlug={setLinkedinSlug}
                 onConnectLinkedIn={connectLinkedIn}

@@ -338,15 +338,17 @@ export const onboarding = {
   },
   linkedin: {
     title: "LinkedIn",
-    description: "Verify your professional identity. We sync from your Clerk-linked LinkedIn account — no scraping.",
+    description: "Add your professional identity. Sign in with LinkedIn to verify ownership, or just paste your profile URL.",
     connect: "Connect with LinkedIn",
     connecting: "Connecting...",
-    sync: "Sync LinkedIn",
+    sync: "Add profile URL",
     syncing: "Syncing...",
-    oauthHint: "You'll sign in with LinkedIn to verify ownership. We only store your public profile slug as evidence.",
-    slugPlaceholder: "your-linkedin-slug",
-    slugHint: "From linkedin.com/in/your-slug — required if sync cannot read it from Clerk.",
+    oauthHint: "Signing in with LinkedIn proves the profile is yours, so it counts as verified evidence and scores higher.",
+    slugPlaceholder: "linkedin.com/in/your-slug",
+    slugHint:
+      "Paste your profile URL or slug — no sign-in needed. It's recorded as self-declared until you verify with LinkedIn.",
     connectedDescription: "Verified identity synced from",
+    connectedUnverifiedDescription: "Self-declared profile (unverified)",
   },
   devpost: {
     title: "Step 2b — Connect Devpost",

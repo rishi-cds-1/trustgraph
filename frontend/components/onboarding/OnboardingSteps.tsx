@@ -152,6 +152,7 @@ type StepSourcesProps = {
   hasDevpost: boolean;
   hasDevfolio: boolean;
   linkedInHandle?: string;
+  linkedInVerified?: boolean;
   linkedinSlug: string;
   setLinkedinSlug: (v: string) => void;
   onConnectLinkedIn: () => void;
@@ -191,6 +192,7 @@ export function StepSources(props: StepSourcesProps) {
     hasDevpost,
     hasDevfolio,
     linkedInHandle,
+    linkedInVerified,
     linkedinSlug,
     setLinkedinSlug,
     onConnectLinkedIn,
@@ -302,9 +304,21 @@ export function StepSources(props: StepSourcesProps) {
                 <p className="font-medium text-teal">{onboarding.sources.linkedinConnected}</p>
                 {linkedInHandle && (
                   <p className="mt-1 text-muted">
-                    {onboarding.linkedin.connectedDescription}{" "}
+                    {linkedInVerified
+                      ? onboarding.linkedin.connectedDescription
+                      : onboarding.linkedin.connectedUnverifiedDescription}{" "}
                     <span className="font-mono font-medium text-teal">@{linkedInHandle}</span>
                   </p>
+                )}
+                {!linkedInVerified && (
+                  <button
+                    type="button"
+                    onClick={() => void startLinkedInOAuth()}
+                    disabled={connecting || !user}
+                    className="mt-2 text-xs font-medium text-teal hover:underline disabled:opacity-50"
+                  >
+                    {onboarding.linkedin.connect} to verify ownership
+                  </button>
                 )}
               </ConnectedBanner>
             ) : (

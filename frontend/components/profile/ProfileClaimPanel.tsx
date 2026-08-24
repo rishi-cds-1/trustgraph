@@ -62,7 +62,7 @@ export function ProfileClaimPanel({ handle }: { handle: string }) {
     return (
       <div className="mt-6 flex flex-wrap gap-3">
         <Button href={routes.claimSignup(handle)}>{profileCopy.shadowClaim.cta}</Button>
-        <Button href={routes.signIn} variant="ghost">
+        <Button href={routes.signInReturningTo(routes.sampleProfile(handle))} variant="ghost">
           {profileCopy.teaser.signInCta}
         </Button>
         <p className="w-full text-xs text-muted">

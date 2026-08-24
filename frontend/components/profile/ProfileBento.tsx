@@ -262,7 +262,11 @@ export function ProfileBentoHero({
         ( !isAuthenticatedView || (isAuthenticatedView && !isOwner)) && (
           <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
             {!isAuthenticatedView && (
-              <Button href={routes.signIn} variant="secondary" className="px-3 py-1.5 text-xs">
+              <Button
+                href={routes.signInReturningTo(routes.sampleProfile(handle))}
+                variant="secondary"
+                className="px-3 py-1.5 text-xs"
+              >
                 {profileCopy.teaser.signInCta}
               </Button>
             )}
@@ -347,7 +351,7 @@ export function BentoCapabilities({
   );
 }
 
-export function BentoTeaserCta() {
+export function BentoTeaserCta({ handle }: { handle?: string }) {
   return (
     <BentoBlock className="col-span-12 bg-accent-soft/30">
       <p className="text-sm leading-snug">
@@ -357,7 +361,7 @@ export function BentoTeaserCta() {
         </span>
       </p>
       <a
-        href={routes.signIn}
+        href={routes.signInReturningTo(handle ? routes.sampleProfile(handle) : null)}
         className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-teal hover:underline"
       >
         {profileCopy.teaser.signInLink} <ArrowRight className="h-3.5 w-3.5" />
