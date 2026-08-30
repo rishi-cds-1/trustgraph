@@ -4,7 +4,7 @@ export const meta = {
     "Portable, evidence-backed reputation. One link answers: can I trust this person? Proof over claims — not a portfolio, not a social network.",
   homeOgTitle: "TrustGraph — Your reputation, finally portable.",
   homeOgDescription:
-    "One Trust Passport link backed by GitHub, Stack Overflow, Devpost & more. Explainable trust score in under 60 seconds — free forever. Claim yours →",
+    "Turn a public GitHub profile into an interview-ready evidence brief in minutes — every claim links to its source. Free for individuals. Human review required.",
   profileTitle: (name: string) => `${name} — TrustGraph`,
   profileDescription: (score: number, evidenceCount: number) =>
     `Trust Score ${score.toFixed(0)}/100 · ${evidenceCount} evidence items`,
@@ -76,7 +76,7 @@ export const landing = {
     titleLine1: "The trust layer",
     titleLine2: "of the internet",
     thesis:
-      "The credit score of human capability — except transparent, explainable, and portable.",
+      "Public technical work, organized into evidence a recruiter can actually review — transparent, explainable, and reviewed by a person.",
     tagline: "Trust anyone online with verifiable reputation data.",
     defaultPreviewHandle: "rishicds",
     searchPlaceholder: "GitHub username — rishicds, torvalds, your-handle…",
@@ -100,7 +100,7 @@ export const landing = {
       button: "Look up",
       loading: "Analyzing public GitHub evidence…",
       error: "Could not find that GitHub user. Try another username.",
-      emptyHint: "Enter any public GitHub username to preview their trust score.",
+      emptyHint: "Enter any public GitHub username to preview their public evidence.",
       fromEvidence: "from public evidence",
       viewPassport: "View passport",
       inviteTitle: (name: string) => `Know ${name}?`,
@@ -109,9 +109,9 @@ export const landing = {
       copyInvite: "Copy invite link",
       copied: "Copied!",
       sendInvite: "Invite them",
-      inviteEmailSubject: (name: string) => `${name}, your TrustGraph trust score is ready`,
+      inviteEmailSubject: (name: string) => `${name}, your TrustGraph evidence preview is ready`,
       inviteEmailBody: (name: string, score: number, inviteUrl: string) =>
-        `Hi ${name},\n\nI looked up your public developer reputation on TrustGraph — your estimated trust score is ${score}/100 based on GitHub evidence.\n\nClaim your Trust Passport to unlock peer verification and boost your score:\n${inviteUrl}\n`,
+        `Hi ${name},\n\nI looked up your public developer evidence on TrustGraph — ${score} evidence signals indexed from your GitHub activity.\n\nClaim your Trust Passport to unlock peer verification and add more evidence:\n${inviteUrl}\n`,
     },
   },
   heroSocialProof: {
@@ -161,8 +161,8 @@ export const landing = {
       },
       {
         index: "04",
-        title: "Trust score",
-        body: "Verified vs unverified ratio. Positive and negative signals listed explicitly. No black box.",
+        title: "Evidence brief",
+        body: "Verified vs unconfirmed evidence, listed explicitly and linked to source. No black box.",
       },
     ],
   },
@@ -188,7 +188,7 @@ export const landing = {
       },
       {
         title: "Investors",
-        body: "Replace pitch-deck guesswork with proof-backed founder credentials and team trust scores.",
+        body: "Replace pitch-deck guesswork with proof-backed founder credentials and evidence-linked team histories.",
       },
       {
         title: "Accelerators",

@@ -87,6 +87,15 @@ export function Footer() {
           ))}
         </div>
       </div>
+
+      <div className="mx-auto mt-6 max-w-7xl px-8">
+        <p className="text-center text-xs font-medium text-[var(--text-muted)]">
+          AI organizes evidence. People make decisions.
+        </p>
+        <p className="mt-1 text-center text-[11px] text-[var(--text-muted)]">
+          An AI Yogen hackathon prototype — not an official Mercari product.
+        </p>
+      </div>
     </footer>
   );
 }

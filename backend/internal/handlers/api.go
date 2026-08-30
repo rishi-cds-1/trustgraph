@@ -18,6 +18,7 @@ import (
 	"github.com/trustgraph/backend/internal/repository"
 	"github.com/trustgraph/backend/internal/service"
 	"github.com/trustgraph/backend/internal/service/claim"
+	"github.com/trustgraph/backend/internal/service/evidencebrief"
 	"github.com/trustgraph/backend/internal/service/insights"
 	"github.com/trustgraph/backend/internal/service/profilesync"
 	emailsvc "github.com/trustgraph/backend/internal/service/email"
@@ -43,6 +44,7 @@ type API struct {
 	email         *emailsvc.Client
 	enrichment    *enrichment.Agent
 	recruiterWorker *recruitersvc.Worker
+	evidenceCache *evidencebrief.Cache
 }
 
 func NewAPI(store *repository.Store, cfg *config.Config) *API {
@@ -67,6 +69,7 @@ func NewAPI(store *repository.Store, cfg *config.Config) *API {
 		devfolio:      devfoliosvc.NewClient(enrichmentAgent),
 		email:         mail,
 		enrichment:    enrichmentAgent,
+		evidenceCache: evidencebrief.NewCache(),
 	}
 	api.recruiterWorker = recruitersvc.NewWorker(store, enrichmentAgent, api.recordScoreChange)
 	return api

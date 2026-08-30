@@ -5,13 +5,11 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 
 import { ContactSalesModal } from "@/components/landing/ContactSalesModal";
-import { routes } from "@/constants";
 import { pricingSection, pricingTiers } from "@/lib/data";
 
 export function Pricing() {
   const [salesOpen, setSalesOpen] = useState(false);
-  const mainTiers = pricingTiers.filter((t) => !t.horizontal);
-  const recruiterTier = pricingTiers.find((t) => t.horizontal);
+  const mainTiers = pricingTiers;
 
   return (
     <section id="pricing" className="bg-white py-24 md:py-28">
@@ -52,7 +50,7 @@ export function Pricing() {
                 <div className="mb-6 flex h-7 items-center justify-center">
                   {tier.featured ? (
                     <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-[var(--text-primary)]">
-                      Most popular
+                      For hiring teams
                     </span>
                   ) : null}
                 </div>
@@ -109,59 +107,37 @@ export function Pricing() {
                   ))}
                 </ul>
 
-                <Link
-                  href={routes.signUp}
-                  className={
-                    tier.featured
-                      ? "mt-auto inline-flex w-full items-center justify-center rounded-[14px] bg-accent px-5 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-green)] transition hover:bg-accent-hover"
-                      : "mt-auto inline-flex w-full items-center justify-center rounded-[14px] border border-border bg-[var(--bg-surface-secondary)] px-5 py-3 text-sm font-semibold text-[var(--text-primary)] transition hover:border-teal/30 hover:bg-white hover:shadow-[var(--shadow-xs)]"
-                  }
-                >
-                  {tier.ctaLabel}
-                </Link>
+                {tier.contactSales ? (
+                  <button
+                    type="button"
+                    onClick={() => setSalesOpen(true)}
+                    className={
+                      tier.featured
+                        ? "mt-auto inline-flex w-full items-center justify-center rounded-[14px] bg-accent px-5 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-green)] transition hover:bg-accent-hover"
+                        : "mt-auto inline-flex w-full items-center justify-center rounded-[14px] border border-border bg-[var(--bg-surface-secondary)] px-5 py-3 text-sm font-semibold text-[var(--text-primary)] transition hover:border-teal/30 hover:bg-white hover:shadow-[var(--shadow-xs)]"
+                    }
+                  >
+                    {tier.ctaLabel}
+                  </button>
+                ) : (
+                  <Link
+                    href="/evidence"
+                    className={
+                      tier.featured
+                        ? "mt-auto inline-flex w-full items-center justify-center rounded-[14px] bg-accent px-5 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-green)] transition hover:bg-accent-hover"
+                        : "mt-auto inline-flex w-full items-center justify-center rounded-[14px] border border-border bg-[var(--bg-surface-secondary)] px-5 py-3 text-sm font-semibold text-[var(--text-primary)] transition hover:border-teal/30 hover:bg-white hover:shadow-[var(--shadow-xs)]"
+                    }
+                  >
+                    {tier.ctaLabel}
+                  </Link>
+                )}
               </div>
             </article>
           ))}
         </div>
-
-        {recruiterTier && (
-          <div className="mx-auto mt-6 flex max-w-4xl flex-col items-start justify-between gap-6 rounded-[20px] border border-border bg-[var(--bg-surface-secondary)] p-8 md:flex-row md:items-center">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-widest text-[var(--text-muted)]">
-                {recruiterTier.name}
-              </p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-[var(--text-primary)]">
-                {recruiterTier.price}
-                <span className="text-base font-normal text-[var(--text-muted)]">
-                  {recruiterTier.priceNote}
-                </span>
-              </p>
-              <p className="mt-2 text-sm text-[var(--text-secondary)]">{recruiterTier.description}</p>
-            </div>
-            <div className="flex flex-col items-start gap-4 md:items-end">
-              <div className="flex flex-wrap gap-2">
-                {recruiterTier.features.map((f) => (
-                  <span
-                    key={f}
-                    className="rounded-full border border-border bg-white px-3 py-1 text-xs text-[var(--text-secondary)]"
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => setSalesOpen(true)}
-                className="inline-flex rounded-[14px] border border-border bg-white px-5 py-2.5 text-sm font-medium text-[var(--text-primary)] transition hover:border-teal/30 hover:shadow-[var(--shadow-xs)]"
-              >
-                {recruiterTier.ctaLabel}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
-      <ContactSalesModal open={salesOpen} onClose={() => setSalesOpen(false)} />
+      <ContactSalesModal open={salesOpen} onClose={() => setSalesOpen(false)} plan="organizations" />
     </section>
   );
 }

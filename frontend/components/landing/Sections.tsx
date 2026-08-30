@@ -10,5 +10,7 @@ export { Testimonials } from "./Testimonials";
 export { ScoreExplainer } from "./ScoreExplainer";
 export { IntegrationEcosystem } from "./IntegrationEcosystem";
 export { Pricing } from "./Pricing";
+export { WhyMercari } from "./WhyMercari";
+export { FAQ } from "./FAQ";
 export { Principles } from "./Principles";
 export { FinalCTA } from "./FinalCTA";

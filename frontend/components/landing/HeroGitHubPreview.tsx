@@ -15,11 +15,16 @@ import {
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileSocialLinks } from "@/components/profile/ProfileSocialLinks";
 import { Button } from "@/components/ui/Button";
-import { NumberTicker } from "@/components/ui/number-ticker";
 import { landing, routes } from "@/constants";
 import { brand } from "@/constants/brand";
 import { api, GitHubPreview } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+function evidenceStrength(value: number): { label: string; className: string } {
+  if (value >= 70) return { label: "Strong evidence", className: "bg-accent-soft text-teal" };
+  if (value >= 40) return { label: "Some evidence", className: "bg-[#EAF2FE] text-[#1D4ED8]" };
+  return { label: "Limited evidence", className: "bg-[var(--bg-surface-secondary)] text-[var(--text-muted)]" };
+}
 
 function trustSignals(preview: GitHubPreview): string[] {
   const signals: string[] = [];
@@ -199,7 +204,7 @@ export function HeroGitHubPreview() {
             <>
               <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-teal">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Live trust preview
+                Live evidence preview
               </div>
 
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
@@ -233,10 +238,10 @@ export function HeroGitHubPreview() {
 
                 <div className="shrink-0 rounded-xl border border-teal/15 bg-teal-light px-5 py-3 text-center sm:text-right">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-teal">
-                    Trust score
+                    Evidence indexed
                   </p>
                   <p className="text-4xl font-extrabold tabular-nums text-[#0A0A0A] md:text-5xl">
-                    <NumberTicker value={preview.trust_score.overall} />
+                    {preview.evidence_count}
                   </p>
                   <p className="mt-0.5 text-xs text-[#6B7280]">{lookup.fromEvidence}</p>
                 </div>
@@ -254,28 +259,26 @@ export function HeroGitHubPreview() {
               )}
 
               {preview.trust_score.dimensions && (
-                <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[#F0F0F0] pt-5 md:grid-cols-4">
+                <div className="mt-5 flex flex-wrap gap-2 border-t border-[#F0F0F0] pt-5">
                   {[
                     { label: "Evidence", value: preview.trust_score.dimensions.evidence_depth },
                     { label: "Consistency", value: preview.trust_score.dimensions.consistency },
                     { label: "Impact", value: preview.trust_score.dimensions.impact_signals },
                     { label: "Peer", value: preview.trust_score.dimensions.peer_verification },
-                  ].map((dim) => (
-                    <div key={dim.label}>
-                      <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-wide text-[#6B7280]">
-                        <span>{dim.label}</span>
-                        <span className="font-mono tabular-nums text-[#0A0A0A]">
-                          {dim.value.toFixed(0)}
-                        </span>
-                      </div>
-                      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-[#F3F4F6]">
-                        <div
-                          className="h-full rounded-full bg-teal transition-all duration-700"
-                          style={{ width: `${Math.min(100, dim.value)}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                  ].map((dim) => {
+                    const strength = evidenceStrength(dim.value);
+                    return (
+                      <span
+                        key={dim.label}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium",
+                          strength.className,
+                        )}
+                      >
+                        {dim.label}: {strength.label}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
 

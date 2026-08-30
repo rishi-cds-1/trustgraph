@@ -9,7 +9,6 @@ import type {
   ProblemCard,
   ScoreSignal,
   Testimonial,
-  TrustDimension,
 } from "@/types/trust";
 import { lottieAssets } from "@/constants/lottie";
 
@@ -20,14 +19,14 @@ export const navLinks: NavLink[] = [
 ];
 
 export const heroContent = {
-  badge: "Now in early access · 4,200 profiles claimed",
-  titleLine1: "Your reputation",
-  titleLine2: "finally portable.",
+  badge: "AI Yogen hackathon prototype · Evidence-first recruiting",
+  titleLine1: "Turn public technical work",
+  titleLine2: "into interview-ready evidence.",
   subhead:
-    "One link that answers the question every professional relationship starts with — backed by evidence, not claims.",
-  primaryCta: "Claim your passport",
-  secondaryCta: "See a live example",
-  proofLine: "Free forever · No tests or forms · Score in under 60 seconds",
+    "TrustGraph helps recruiting teams and hiring managers organize public code, research, and projects into role-specific candidate briefs.",
+  primaryCta: "Analyze a GitHub profile",
+  secondaryCta: "View sample evidence brief",
+  proofLine: "Public sources only. Analysis requires consent. AI organizes evidence; people make decisions.",
 };
 
 export const stats: LandingStat[] = [
@@ -50,32 +49,25 @@ export const platformLogos = [
 ];
 
 export const passportDemo = {
-  label: "Trust Passport",
-  title: "One link that shows what you've actually built.",
-  body: "Share a single URL instead of a résumé. Every claim links to public proof — recruiters see capability, not keyword stuffing.",
+  label: "Evidence Brief",
+  title: "One brief that shows what a candidate has actually built.",
+  body: "Give it a public GitHub profile and a role's requirements. It organizes merged PRs, shipped repos, and real activity into a brief a recruiter can read in minutes — every line links back to the source.",
   bullets: [
-    "Evidence from GitHub, Stack Overflow, Devpost, and more",
-    "Explainable trust score with named dimensions",
-    "Teaser view for anyone; full detail when it matters",
-    "Updates automatically as you ship more work",
+    "Evidence pulled from GitHub — repos, PRs, real activity",
+    "Matched against the specific role's requirements",
+    "Every card links to the original public source",
+    "Flags what's missing instead of guessing",
   ],
-  cta: "Claim your passport",
-  exampleLink: "See a live example",
+  cta: "Analyze a GitHub profile",
+  exampleLink: "View sample evidence brief",
   profile: {
     name: "Rishi Paul",
     handle: "rishicds",
-    score: 82,
-    delta: 3,
     url: "trustgraph.com/rishicds",
   },
 };
 
-export const passportDimensions: TrustDimension[] = [
-  { name: "Evidence", value: 88, color: "bg-accent" },
-  { name: "Consistency", value: 74, color: "bg-accent" },
-  { name: "Impact", value: 61, color: "bg-accent" },
-  { name: "Peer", value: 40, color: "bg-accent" },
-];
+export const passportTechAreas: string[] = ["Backend systems", "API design", "Open source", "CI/CD"];
 
 export const passportEvidence: EvidenceItem[] = [
   { source: "github", label: "88 merged pull requests", verified: true, sourceLabel: "GitHub" },
@@ -136,14 +128,14 @@ export const architectureLayers: ArchitectureLayer[] = [
   },
   {
     index: "04",
-    title: "Trust Score",
-    body: "Explainable, not black-box. Every point has a reason linked to evidence.",
+    title: "Evidence Brief",
+    body: "Explainable, not black-box. Every requirement match has a reason linked to a source.",
   },
 ];
 
 export const howItWorksSection = {
   label: "How it works",
-  title: "A score in under 60 seconds.",
+  title: "Evidence, organized in under 60 seconds.",
   subtitle: "No forms. No tests.",
 };
 
@@ -187,16 +179,14 @@ export const testimonials: Testimonial[] = [
     name: "Arjun Krishnan",
     role: "Full-stack",
     city: "Bangalore",
-    score: 79,
     initials: "AK",
   },
   {
-    quote: "The consistency score tells me everything about a contributor in 10 seconds.",
+    quote: "The evidence brief tells me everything about a contributor's work in 10 seconds.",
     boldPhrase: "in 10 seconds.",
     name: "Sara Müller",
     role: "OSS maintainer",
     city: "Berlin",
-    score: 91,
     initials: "SM",
   },
   {
@@ -206,36 +196,35 @@ export const testimonials: Testimonial[] = [
     name: "Priya Chandran",
     role: "Independent dev",
     city: "Mumbai",
-    score: 86,
     initials: "PC",
   },
 ];
 
 export const scoreExplainerSection = {
   label: "Explainability",
-  title: "Every score has a reason.",
+  title: "Every match has a reason, linked to a source.",
   subtitle: "No black boxes — ever.",
-  rightTitle: "Unlike a credit score, you can see exactly why.",
+  rightTitle: "You can see exactly why, every time.",
   rightBody:
-    "Every signal affecting your score is listed, linked, and disputable. Positive contributions and gaps are both visible — so you know what to improve and recruiters know what they're betting on.",
+    "Every signal in the brief is listed, linked, and disputable. Strong matches and gaps are both visible — so recruiters know what's confirmed and what still needs a human conversation.",
 };
 
 export const scoreSignals: ScoreSignal[] = [
-  { positive: true, text: "88 merged PRs on GitHub", points: 31 },
-  { positive: true, text: "Active since 2021, no gap >60d", points: 24 },
-  { positive: true, text: "3 hackathon wins on Devpost", points: 18 },
-  { positive: true, text: "Stars from non-followers", points: 14 },
-  { positive: false, text: "2 listed projects, no public repo", points: -9 },
-  { positive: false, text: "Peer verification pending (0/3)", points: -4 },
+  { positive: true, text: "88 merged PRs on GitHub", points: 0 },
+  { positive: true, text: "Active since 2021, no gap >60d", points: 0 },
+  { positive: true, text: "3 hackathon wins on Devpost", points: 0 },
+  { positive: true, text: "Stars from non-followers", points: 0 },
+  { positive: false, text: "2 listed projects, no public repo — requires confirmation", points: 0 },
+  { positive: false, text: "Peer verification pending", points: 0 },
 ];
 
 export const scoreComparison = {
-  headers: ["", "Explainable", "Portable", "Evidence-linked", "Disputable"],
+  headers: ["", "Evidence-linked", "Reviewed by a person", "Portable", "Disputable"],
   rows: [
-    { name: "TrustGraph", values: ["✓", "✓", "✓", "✓"], highlight: true },
-    { name: "LinkedIn", values: ["✗", "~", "✗", "✗"] },
-    { name: "Credit score", values: ["✗", "✓", "✗", "~"] },
-    { name: "Self-reported CV", values: ["~", "✓", "✗", "✗"] },
+    { name: "TrustGraph evidence brief", values: ["✓", "✓", "✓", "✓"], highlight: true },
+    { name: "Résumé keyword match", values: ["✗", "~", "✓", "✗"] },
+    { name: "LinkedIn profile", values: ["✗", "~", "~", "✗"] },
+    { name: "Recruiter gut-check", values: ["✗", "✓", "✗", "~"] },
   ],
 };
 
@@ -257,63 +246,92 @@ export const integrationInnerOrbit = ["GitHub", "Stack Overflow", "Devpost"];
 export const integrationOuterOrbit = ["LinkedIn", "Google Scholar", "arXiv", "Sessionize"];
 
 export const pricingSection = {
-  label: "Pricing",
-  title: "Simple plans. No score inflation.",
+  label: "Business vision",
+  title: "From recruiting evidence to portable professional trust",
   subtitle:
-    "Payment never boosts your score. Pro unlocks insight — not points. Recruiter discovery requires your explicit opt-in.",
+    "The recruiting assistant is TrustGraph's starting wedge, not its complete business. Individuals build and control evidence-backed professional profiles for free. Organizations pay for role-specific evidence research, verification workflows, and integrations. Over time, the profile becomes a portable professional trust layer that helps demonstrated skills circulate between opportunities.",
 };
 
 export const pricingTagline = pricingSection.subtitle;
 
 export const pricingTiers: PricingTier[] = [
   {
-    name: "Free",
+    name: "Free for individuals",
     price: "$0",
-    description: "Trust Passport, core sources, explainable score",
+    description: "Every builder owns their evidence record, for free, forever.",
     features: [
-      "Trust Passport",
-      "GitHub + SO + Devpost",
-      "Score + explainability",
-      "README badge",
-      "3 peer verifications",
-      "Privacy controls",
+      "Candidate-owned evidence passport",
+      "Public professional source integrations",
+      "Correction and attribution controls",
+      "Visibility settings",
+      "Portable profile",
     ],
-    ctaLabel: "Get started",
+    ctaLabel: "Analyze a GitHub profile",
   },
   {
-    name: "Pro",
-    price: "$15",
-    priceNote: "/mo",
-    description: "History, insights, timeline, and API access",
+    name: "Paid for organizations",
+    price: "Contact sales",
+    description: "Recruiting teams get evidence briefs at hiring volume, plus workflow tooling.",
     features: [
-      "Everything in Free",
-      "Score history",
-      "Comparative insights",
-      "Trust Timeline",
-      "Recruiter signal alerts",
-      "Webhooks & API key",
-      "Unlimited peer verifications",
+      "Role-specific evidence research",
+      "Candidate evidence briefs",
+      "Interview preparation",
+      "Verification workflows",
+      "ATS/workflow integrations",
+      "Evidence API",
     ],
     featured: true,
     dark: true,
-    ctaLabel: "Upgrade to Pro",
-  },
-  {
-    name: "Recruiter",
-    price: "$149",
-    priceNote: "/mo",
-    description: "Search opt-in profiles by score, skill, and location",
-    features: [
-      "Search by score/skill/location",
-      "Opt-in profiles only",
-      "One-click verification",
-      "Shortlist exports",
-      "Team trust scores",
-    ],
-    horizontal: true,
+    contactSales: true,
     ctaLabel: "Contact sales",
   },
 ];
+
+export const whyMercariSection = {
+  label: "Why Mercari?",
+  title: "Why we built this at Mercari",
+  paragraphs: [
+    "Mercari has spent more than a decade reducing uncertainty between unfamiliar people through identity, reputation, safety, and human-centered marketplace design. TrustGraph applies that expertise to another form of value: demonstrated professional skill.",
+    "Mercari made it possible for anyone to turn unused possessions into value. TrustGraph explores whether Mercari can also help people turn demonstrated skills into opportunity.",
+  ],
+};
+
+export const faqSection = {
+  label: "FAQ",
+  title: "Common questions",
+  items: [
+    {
+      question: "Does TrustGraph replace recruiters?",
+      answer:
+        "No. TrustGraph organizes public evidence and prepares context. Recruiters and hiring managers define the criteria, interpret the evidence, conduct interviews, and make every decision.",
+    },
+    {
+      question: "Does TrustGraph decide whom to hire?",
+      answer:
+        "No. It does not produce hire/reject recommendations. It shows evidence, sources, uncertainty, and areas requiring confirmation.",
+    },
+    {
+      question: "What if public evidence is missing?",
+      answer:
+        "Missing public evidence is not evidence that a person lacks a capability. Private work, team contributions, and production impact may not be visible publicly.",
+    },
+    {
+      question: "Can people correct their profiles?",
+      answer:
+        "The product is designed to support identity confirmation, source inspection, correction requests, and removal of incorrectly attributed evidence.",
+    },
+    {
+      question: "Is this Mercari Hallo again?",
+      answer:
+        "Mercari Hallo matched people with shifts and operated employment transactions. TrustGraph creates portable, evidence-backed professional identity. It does not list jobs, process applications, schedule work, set wages, or make hiring decisions.",
+    },
+    {
+      question: "What is the business?",
+      answer:
+        "The recruiting assistant is the initial wedge. The long-term business is trusted professional identity: individuals control portable evidence profiles, while organizations pay for evidence research, verification, and workflow integrations.",
+    },
+  ],
+};
 
 export const principlesSection = {
   label: "Principles",

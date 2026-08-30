@@ -9,7 +9,6 @@ import { HeroGitHubPreview } from "@/components/landing/HeroGitHubPreview";
 import { LottiePlayer } from "@/components/lottie/LottiePlayer";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { RetroGrid } from "@/components/ui/retro-grid";
-import { routes, sampleProfileHandle } from "@/constants";
 import { lottieAssets, lottieSizes } from "@/constants/lottie";
 import { heroContent } from "@/lib/data";
 import { gsap } from "@/lib/gsap";
@@ -56,21 +55,22 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(123,225,59,0.14),transparent)]" />
 
       <div className="relative z-10 hidden lg:block">
-        <div className="float-card absolute left-[max(1rem,calc(50%-520px))] top-[38%] w-44 rounded-2xl border border-border bg-white/80 p-3 shadow-[var(--shadow-md)] backdrop-blur-sm">
+        <div className="float-card absolute left-[max(1rem,calc(50%-520px))] top-[38%] w-48 rounded-2xl border border-border bg-white/80 p-3 shadow-[var(--shadow-md)] backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-light text-xs font-semibold text-teal">
               R
             </div>
             <div>
               <p className="text-xs font-medium text-[var(--text-primary)]">@rishicds</p>
-              <p className="text-[11px] text-[var(--text-muted)]">Trust Score: 95</p>
+              <p className="text-[11px] text-[var(--text-muted)]">37 sources verified</p>
             </div>
           </div>
         </div>
         <div className="float-card absolute right-[max(1rem,calc(50%-480px))] top-[28%] rounded-2xl border border-border bg-white/80 p-3 shadow-[var(--shadow-md)] backdrop-blur-sm">
-          <p className="text-[11px] text-[var(--text-muted)]">Evidence</p>
-          <p className="text-2xl font-bold text-[var(--text-primary)]">
-            88<span className="text-sm font-normal text-[var(--text-muted)]">/100</span>
+          <p className="text-[11px] text-[var(--text-muted)]">Evidence card</p>
+          <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-[var(--text-primary)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            Merged pull request
           </p>
         </div>
         <div className="float-card absolute bottom-[28%] right-[max(1rem,calc(50%-440px))]">
@@ -114,14 +114,14 @@ export function Hero() {
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Link
-            href={routes.signUp}
+            href="/evidence"
             className="inline-flex items-center gap-2 rounded-[14px] bg-accent px-7 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-green)] transition hover:bg-accent-hover"
           >
             {heroContent.primaryCta}
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            href={routes.sampleProfile(sampleProfileHandle)}
+            href="/evidence/brief?snapshot=rishicds"
             className="inline-flex items-center rounded-[14px] border border-border bg-white px-7 py-3 text-sm font-medium text-[var(--text-primary)] shadow-[var(--shadow-xs)] transition hover:shadow-[var(--shadow-sm)]"
           >
             {heroContent.secondaryCta}

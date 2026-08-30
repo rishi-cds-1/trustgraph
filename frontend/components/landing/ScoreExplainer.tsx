@@ -4,7 +4,6 @@ import { useGSAP } from "@gsap/react";
 import { useRef } from "react";
 
 import { LottiePlayer } from "@/components/lottie/LottiePlayer";
-import { NumberTicker } from "@/components/ui/number-ticker";
 import { lottieAssets, lottieSizes } from "@/constants/lottie";
 import { scoreComparison, scoreExplainerSection, scoreSignals } from "@/lib/data";
 import { gsap } from "@/lib/gsap";
@@ -47,31 +46,31 @@ export function ScoreExplainer() {
                 style={{ width: lottieSizes.card, height: lottieSizes.card }}
               />
               <p className="text-sm font-medium text-[var(--text-secondary)]">
-                Score breakdown · @rishicds
+                Evidence breakdown · @rishicds
               </p>
             </div>
-            <p className="mt-4 text-sm text-[var(--text-muted)]">Trust Score</p>
-            <NumberTicker value={82} className="text-5xl font-bold text-[var(--text-primary)]" />
+            <p className="mt-4 text-sm text-[var(--text-muted)]">Evidence signals</p>
 
-            <div className="mt-6">
+            <div className="mt-4">
               {scoreSignals.map((signal) => (
                 <div
                   key={signal.text}
                   className="signal-row flex items-center justify-between border-b border-[var(--border-soft)] py-2.5 text-sm"
                 >
                   <span className="text-[var(--text-secondary)]">
-                    <span className={signal.positive ? "text-accent" : "text-red-400"}>
-                      {signal.positive ? "[+]" : "[−]"}
+                    <span className={signal.positive ? "text-teal" : "text-[var(--text-muted)]"}>
+                      {signal.positive ? "[✓]" : "[?]"}
                     </span>{" "}
                     {signal.text}
                   </span>
                   <span
-                    className={`text-xs font-semibold ${
-                      signal.positive ? "text-teal" : "text-red-400"
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      signal.positive
+                        ? "bg-accent-soft text-teal"
+                        : "bg-[#FFFBEB] text-[#92400E]"
                     }`}
                   >
-                    {signal.points > 0 ? "+" : ""}
-                    {signal.points} pts
+                    {signal.positive ? "Verified" : "Requires confirmation"}
                   </span>
                 </div>
               ))}
@@ -116,9 +115,7 @@ export function ScoreExplainer() {
                           className={`border-b border-[var(--border-soft)] px-4 py-3 ${
                             val === "✓"
                               ? "font-medium text-teal"
-                              : val === "✗"
-                                ? "text-red-400"
-                                : "text-[var(--text-muted)]"
+                              : "text-[var(--text-muted)]"
                           }`}
                         >
                           {val}

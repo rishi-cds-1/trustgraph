@@ -75,22 +75,18 @@ export function FeaturedProfiles({ profiles }: FeaturedProfilesProps) {
                             <p className="mt-0.5 font-mono text-xs text-muted">/{profile.handle}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {profile.trust_score.overall > 0 ? (
-                            <NumberTicker
-                              value={profile.trust_score.overall}
-                              className="text-2xl font-bold"
-                            />
-                          ) : (
-                            <span className="font-mono text-2xl text-muted">—</span>
-                          )}
-                          <ArrowUpRight className="h-4 w-4 text-muted opacity-0 transition group-hover:opacity-100" />
-                        </div>
+                        <ArrowUpRight className="h-4 w-4 shrink-0 text-muted opacity-0 transition group-hover:opacity-100" />
                       </div>
-                      {profile.evidence_count > 0 && (
-                        <p className="mt-3 text-xs text-muted">
-                          {profile.evidence_count} evidence items
-                        </p>
+                      {profile.evidence_count > 0 ? (
+                        <div className="mt-3 flex items-baseline gap-1.5">
+                          <NumberTicker
+                            value={profile.evidence_count}
+                            className="text-2xl font-bold"
+                          />
+                          <span className="text-xs text-muted">evidence items</span>
+                        </div>
+                      ) : (
+                        <p className="mt-3 text-xs text-muted">Evidence pending review</p>
                       )}
                     </div>
                   </MagicCard>

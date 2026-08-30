@@ -17,27 +17,32 @@ type Client struct {
 }
 
 type UserProfile struct {
-	Login            string
-	Name             string
-	AvatarURL        string
-	Bio              string
-	Blog             string
-	TwitterUsername  string
-	HTMLURL          string
-	PublicEmail      string
-	PublicRepos      int
-	Followers        int
-	CreatedAt        time.Time
-	SocialLinks      SocialLinks
+	Login           string
+	Name            string
+	AvatarURL       string
+	Bio             string
+	Blog            string
+	TwitterUsername string
+	HTMLURL         string
+	PublicEmail     string
+	PublicRepos     int
+	Followers       int
+	CreatedAt       time.Time
+	SocialLinks     SocialLinks
 }
 
 type Repo struct {
-	Name      string
-	Language  string
-	Stars     int
-	Forks     int
-	UpdatedAt time.Time
-	HTMLURL   string
+	Name        string
+	Language    string
+	Stars       int
+	Forks       int
+	UpdatedAt   time.Time
+	HTMLURL     string
+	Description string
+	Topics      []string
+	PushedAt    time.Time
+	Fork        bool
+	Archived    bool
 }
 
 type Stats struct {
@@ -307,12 +312,17 @@ func (c *Client) fetchSocialAccountsGraphQL(ctx context.Context, login string) (
 
 func (c *Client) fetchRepos(ctx context.Context, username string) ([]Repo, error) {
 	var raw []struct {
-		Name      string    `json:"name"`
-		Language  string    `json:"language"`
-		Stars     int       `json:"stargazers_count"`
-		Forks     int       `json:"forks_count"`
-		UpdatedAt time.Time `json:"updated_at"`
-		HTMLURL   string    `json:"html_url"`
+		Name        string    `json:"name"`
+		Language    string    `json:"language"`
+		Stars       int       `json:"stargazers_count"`
+		Forks       int       `json:"forks_count"`
+		UpdatedAt   time.Time `json:"updated_at"`
+		HTMLURL     string    `json:"html_url"`
+		Description string    `json:"description"`
+		Topics      []string  `json:"topics"`
+		PushedAt    time.Time `json:"pushed_at"`
+		Fork        bool      `json:"fork"`
+		Archived    bool      `json:"archived"`
 	}
 	endpoint := fmt.Sprintf("https://api.github.com/users/%s/repos?sort=updated&per_page=100", url.PathEscape(username))
 	if err := c.getJSON(ctx, endpoint, &raw); err != nil {
@@ -321,15 +331,64 @@ func (c *Client) fetchRepos(ctx context.Context, username string) ([]Repo, error
 	repos := make([]Repo, 0, len(raw))
 	for _, r := range raw {
 		repos = append(repos, Repo{
-			Name:      r.Name,
-			Language:  r.Language,
-			Stars:     r.Stars,
-			Forks:     r.Forks,
-			UpdatedAt: r.UpdatedAt,
-			HTMLURL:   r.HTMLURL,
+			Name:        r.Name,
+			Language:    r.Language,
+			Stars:       r.Stars,
+			Forks:       r.Forks,
+			UpdatedAt:   r.UpdatedAt,
+			HTMLURL:     r.HTMLURL,
+			Description: r.Description,
+			Topics:      r.Topics,
+			PushedAt:    r.PushedAt,
+			Fork:        r.Fork,
+			Archived:    r.Archived,
 		})
 	}
 	return repos, nil
+}
+
+// FetchReadme returns the raw README markdown for a repo, or ("", nil) if the
+// repo has no README (404). Individual callers should tolerate a missing
+// README gracefully rather than treating it as a hard failure.
+func (c *Client) FetchReadme(ctx context.Context, owner, repo string) (string, error) {
+	owner = strings.TrimSpace(owner)
+	repo = strings.TrimSpace(repo)
+	if owner == "" || repo == "" {
+		return "", fmt.Errorf("owner and repo required")
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 8*time.Second)
+	defer cancel()
+
+	endpoint := fmt.Sprintf("https://api.github.com/repos/%s/%s/readme", url.PathEscape(owner), url.PathEscape(repo))
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Accept", "application/vnd.github.raw+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	if c.token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.token)
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusNotFound {
+		return "", nil
+	}
+
+	body, err := io.ReadAll(io.LimitReader(res.Body, 20*1024))
+	if err != nil {
+		return "", err
+	}
+	if res.StatusCode >= 400 {
+		return "", fmt.Errorf("github api %s: %s", res.Status, strings.TrimSpace(string(body)))
+	}
+	return string(body), nil
 }
 
 func (c *Client) fetchMergedPRCount(ctx context.Context, username string) (int, error) {

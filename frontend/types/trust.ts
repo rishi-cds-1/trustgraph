@@ -23,7 +23,6 @@ export interface Testimonial {
   name: string;
   role: string;
   city: string;
-  score: number;
   initials: string;
 }
 
@@ -38,6 +37,8 @@ export interface PricingTier {
   ctaLabel: string;
   dark?: boolean;
   horizontal?: boolean;
+  /** When true, the tier's CTA opens the contact-sales modal instead of linking to sign-up. */
+  contactSales?: boolean;
 }
 
 export interface NavLink {

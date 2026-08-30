@@ -84,6 +84,9 @@ func main() {
 		r.Get("/profiles", api.ListProfiles)
 		r.Get("/preview/github/{username}", api.PreviewGitHub)
 		r.Get("/verifications/{token}/confirm", api.ConfirmPeerVerification)
+		r.Post("/evidence/extract-requirements", api.ExtractRequirements)
+		r.Post("/evidence/analyze", api.AnalyzeForRole)
+		r.Get("/evidence/snapshot/{handle}", api.EvidenceSnapshot)
 
 		r.Group(func(r chi.Router) {
 			r.Use(authmw.APIKeyAuth(store))

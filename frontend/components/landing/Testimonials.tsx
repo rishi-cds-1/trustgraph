@@ -12,21 +12,16 @@ function TestimonialCard({ item }: { item: (typeof testimonials)[number] }) {
         <strong className="text-[var(--text-primary)]">{item.boldPhrase}</strong>
         {parts[1]}&rdquo;
       </p>
-      <div className="mt-5 flex items-center justify-between border-t border-[var(--border-soft)] pt-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-xs font-semibold text-teal">
-            {item.initials}
-          </div>
-          <div>
-            <p className="text-sm font-medium text-[var(--text-primary)]">{item.name}</p>
-            <p className="text-xs text-[var(--text-muted)]">
-              {item.role} · {item.city}
-            </p>
-          </div>
+      <div className="mt-5 flex items-center gap-3 border-t border-[var(--border-soft)] pt-4">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-xs font-semibold text-teal">
+          {item.initials}
         </div>
-        <span className="rounded-full bg-teal-light px-2 py-1 text-xs font-medium text-teal">
-          ↑{item.score}
-        </span>
+        <div>
+          <p className="text-sm font-medium text-[var(--text-primary)]">{item.name}</p>
+          <p className="text-xs text-[var(--text-muted)]">
+            {item.role} · {item.city}
+          </p>
+        </div>
       </div>
     </article>
   );

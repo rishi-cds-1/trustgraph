@@ -7,6 +7,7 @@ import { meta } from "@/constants";
 import { appBaseUrl } from "@/lib/app-url";
 import {
   Architecture,
+  FAQ,
   FeaturedProfiles,
   FinalCTA,
   Hero,
@@ -19,6 +20,7 @@ import {
   ScoreExplainer,
   SocialProof,
   Testimonials,
+  WhyMercari,
 } from "@/components/landing/Sections";
 import { fetchFeaturedProfiles } from "@/lib/featuredProfiles";
 
@@ -70,6 +72,8 @@ export default async function HomePage() {
           <ScoreExplainer />
           <IntegrationEcosystem />
           <Pricing />
+          <WhyMercari />
+          <FAQ />
           <Principles />
           <FinalCTA />
         </main>

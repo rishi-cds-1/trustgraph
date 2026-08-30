@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useGSAP } from "@gsap/react";
-import { motion } from "motion/react";
 import { useRef } from "react";
 import {
   ArrowRight,
@@ -18,12 +17,10 @@ import {
 
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { MagicCard } from "@/components/ui/magic-card";
-import { NumberTicker } from "@/components/ui/number-ticker";
-import { routes, sampleProfileHandle } from "@/constants";
 import {
   passportDemo,
-  passportDimensions,
   passportEvidence,
+  passportTechAreas,
 } from "@/lib/data";
 import { gsap } from "@/lib/gsap";
 import type { EvidenceItem } from "@/types/trust";
@@ -103,14 +100,14 @@ export function PassportDemo() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              href={routes.signUp}
+              href="/evidence"
               className="inline-flex items-center gap-2 rounded-[14px] bg-accent px-6 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-green)] transition hover:bg-accent-hover"
             >
               {passportDemo.cta}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href={routes.sampleProfile(sampleProfileHandle)}
+              href="/evidence/brief?snapshot=rishicds"
               className="inline-flex items-center gap-2 rounded-[14px] border border-border bg-white px-6 py-3 text-sm font-medium text-[var(--text-primary)] shadow-[var(--shadow-xs)] transition hover:border-teal/30 hover:shadow-[var(--shadow-sm)]"
             >
               {passportDemo.exampleLink}
@@ -131,7 +128,7 @@ export function PassportDemo() {
             <div className="overflow-hidden rounded-[24px] border border-border bg-white shadow-[var(--shadow-md)]">
               <div className="flex items-center justify-between border-b border-[var(--border-soft)] bg-[var(--bg-surface-secondary)] px-6 py-2.5">
                 <span className="text-[11px] font-semibold uppercase tracking-widest text-teal">
-                  Trust Passport
+                  Evidence Brief
                 </span>
                 <ShieldCheck className="h-4 w-4 text-teal" strokeWidth={2} aria-hidden />
               </div>
@@ -150,44 +147,26 @@ export function PassportDemo() {
                       <p className="text-sm text-[var(--text-muted)]">@{profile.handle}</p>
                     </div>
                   </div>
-                  <div className="rounded-2xl bg-teal-light px-3 py-2 text-right">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-teal">
-                      Trust Score
-                    </p>
-                    <div className="mt-0.5 flex items-end justify-end gap-1.5">
-                      <NumberTicker value={profile.score} className="text-3xl font-bold leading-none" />
-                      <span className="mb-0.5 inline-flex items-center gap-0.5 rounded-full bg-accent-soft px-1.5 py-0.5 text-[11px] font-semibold text-accent">
-                        <ArrowUpRight className="h-3 w-3" />
-                        +{profile.delta}
-                      </span>
-                    </div>
-                  </div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-[var(--bg-surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
+                    Human review required
+                  </span>
                 </div>
               </div>
 
               <div className="space-y-3.5 border-t border-[var(--border-soft)] px-6 py-4">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                  Dimensions
+                  Demonstrated technical areas
                 </p>
-                {passportDimensions.map((dim, index) => (
-                  <div key={dim.name}>
-                    <div className="mb-1.5 flex justify-between text-sm">
-                      <span className="font-medium text-[var(--text-secondary)]">{dim.name}</span>
-                      <span className="font-semibold tabular-nums text-[var(--text-primary)]">
-                        {dim.value}/100
-                      </span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-[var(--border-soft)]">
-                      <motion.div
-                        className="h-full rounded-full bg-linear-to-r from-teal to-accent"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${dim.value}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: index * 0.15, ease: "easeOut" }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                <div className="flex flex-wrap gap-2">
+                  {passportTechAreas.map((area) => (
+                    <span
+                      key={area}
+                      className="rounded-full bg-teal-light px-3 py-1.5 text-sm font-medium text-teal"
+                    >
+                      {area}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2.5 bg-[var(--bg-surface-secondary)] px-6 py-4">
