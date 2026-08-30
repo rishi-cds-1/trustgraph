@@ -392,109 +392,6 @@ async function request<T>(path: string, init?: RequestInit, token?: string): Pro
   return data as T;
 }
 
-// ---- Evidence Brief flow ----
-
-export type Priority = "required" | "preferred";
-
-export type Requirement = { id: string; label: string; priority: Priority };
-
-export type Role = { title: string; requirements: Requirement[] };
-
-export type EvidenceState =
-  | "strong_direct_evidence"
-  | "relevant_evidence"
-  | "partial_evidence"
-  | "insufficient_evidence"
-  | "requires_confirmation";
-
-export type RequirementMatch = {
-  requirement_id: string;
-  state: EvidenceState;
-  explanation: string;
-  evidence_card_ids: string[];
-};
-
-export type EvidenceCardData = {
-  id: string;
-  claim: string;
-  explanation: string;
-  artifact_name: string;
-  source_url: string;
-  file_or_commit_ref?: string;
-  date?: string;
-  kind: "direct" | "ai_interpretation";
-  confidence: "high" | "medium" | "low";
-};
-
-export type TimelineEntry = {
-  date: string;
-  label: string;
-  description: string;
-  source_url?: string;
-};
-
-export type InterviewQuestion = {
-  question: string;
-  motivating_artifact: string;
-  source_url: string;
-  what_it_surfaces: string;
-};
-
-export type EvidenceCandidate = {
-  github_username: string;
-  display_name: string;
-  avatar_url: string;
-  github_url: string;
-};
-
-export type EvidenceBrief = {
-  source: "live" | "snapshot";
-  candidate: EvidenceCandidate;
-  role: Role;
-  generated_at: string;
-  sources_analyzed: number;
-  summary: string;
-  technical_areas: string[];
-  requirement_matches: RequirementMatch[];
-  evidence_cards: EvidenceCardData[];
-  timeline: TimelineEntry[];
-  limitations: string[];
-  interview_questions: InterviewQuestion[];
-};
-
-export type ExtractRequirementsResponse = {
-  requirements: Requirement[];
-  source: "ai" | "fallback";
-};
-
-export type AnalyzeErrorType = "not_found" | "timeout" | "rate_limited" | "private_or_empty";
-
-export type AnalyzeErrorPayload = {
-  error_type?: AnalyzeErrorType;
-  message?: string;
-  error?: string;
-  snapshot_available?: boolean;
-  snapshot_handle?: string;
-};
-
-/**
- * Thrown by `analyzeForRole` on any non-2xx response. Unlike the generic
- * `request()` helper (which only surfaces `data.error` as a plain Error),
- * this preserves the full error payload so callers can branch on
- * `error_type` / `snapshot_available` / `snapshot_handle`.
- */
-export class AnalyzeRequestError extends Error {
-  status: number;
-  payload: AnalyzeErrorPayload;
-
-  constructor(status: number, payload: AnalyzeErrorPayload) {
-    super(payload.message ?? payload.error ?? "Request failed");
-    this.name = "AnalyzeRequestError";
-    this.status = status;
-    this.payload = payload;
-  }
-}
-
 export function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}` };
 }
@@ -594,6 +491,13 @@ export const api = {
       method: "POST",
       body: JSON.stringify(username?.trim() ? { username: username.trim() } : {}),
     }, token),
+  connectPortfolio: (token: string, url: string) =>
+    request<Profile>("/v1/profiles/connect/portfolio", {
+      method: "POST",
+      body: JSON.stringify({ url }),
+    }, token),
+  refreshInsights: (token: string) =>
+    request<Profile>("/v1/profiles/enrich", { method: "POST" }, token),
   addManualClaim: (token: string, body: { type: string; title: string; url?: string }) =>
     request<Profile>("/v1/profiles/claims/manual", {
       method: "POST",
@@ -788,31 +692,4 @@ export const api = {
       { method: "PATCH", body: JSON.stringify({ segment }) },
       token,
     ),
-  extractRequirements: (jobDescription: string) =>
-    request<ExtractRequirementsResponse>("/v1/evidence/extract-requirements", {
-      method: "POST",
-      body: JSON.stringify({ job_description: jobDescription }),
-    }),
-  analyzeForRole: async (
-    githubUsername: string,
-    role: Role,
-    consent: boolean,
-  ): Promise<EvidenceBrief> => {
-    const res = await fetch(`${API_URL}/v1/evidence/analyze`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ github_username: githubUsername, role, consent }),
-      cache: "no-store",
-    });
-
-    const text = await res.text();
-    const data = text ? (JSON.parse(text) as Record<string, unknown>) : {};
-
-    if (!res.ok) {
-      throw new AnalyzeRequestError(res.status, data as AnalyzeErrorPayload);
-    }
-    return data as EvidenceBrief;
-  },
-  getSnapshotBrief: (handle: string) =>
-    request<EvidenceBrief>(`/v1/evidence/snapshot/${encodeURIComponent(handle.trim())}`),
 };

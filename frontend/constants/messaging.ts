@@ -311,11 +311,12 @@ export const onboarding = {
   },
   sources: {
     title: "Step 2 — Link more accounts",
-    description: "Optional sources strengthen your score. Connect LinkedIn, Stack Overflow, Devpost, Devfolio, or add a talk — skip anytime.",
+    description: "Optional sources strengthen your score. Connect LinkedIn, a portfolio site, Stack Overflow, Devpost, Devfolio, or add a talk — skip anytime.",
     linkedinConnected: "LinkedIn connected — verified identity added to your passport.",
     soConnected: "Stack Overflow connected — nice work!",
     devpostConnected: "Devpost connected — hackathon wins added.",
     devfolioConnected: "Devfolio connected — hackathon wins and projects added.",
+    portfolioConnected: "Portfolio connected — we'll scan it during your deep scan.",
     connectedSummary: "Connected",
   },
   github: {
@@ -361,6 +362,13 @@ export const onboarding = {
     title: "Connect Devfolio",
     description: "Paste your Devfolio profile URL or username — we'll scrape hackathon wins and projects during connect.",
     placeholder: "devfolio.co/@username or @username",
+    connect: "Connect",
+    connecting: "Connecting...",
+  },
+  portfolio: {
+    title: "Connect Portfolio",
+    description: "Paste your personal site or portfolio URL — we'll scan it with Firecrawl during your deep scan for real project evidence.",
+    placeholder: "https://yourname.dev",
     connect: "Connect",
     connecting: "Connecting...",
   },

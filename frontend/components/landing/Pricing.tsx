@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 
 import { ContactSalesModal } from "@/components/landing/ContactSalesModal";
+import { routes } from "@/constants/routes";
 import { pricingSection, pricingTiers } from "@/lib/data";
 
 export function Pricing() {
@@ -121,7 +122,7 @@ export function Pricing() {
                   </button>
                 ) : (
                   <Link
-                    href="/evidence"
+                    href={routes.onboarding}
                     className={
                       tier.featured
                         ? "mt-auto inline-flex w-full items-center justify-center rounded-[14px] bg-accent px-5 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-green)] transition hover:bg-accent-hover"

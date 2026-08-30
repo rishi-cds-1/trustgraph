@@ -165,6 +165,47 @@ func (a *API) ConnectLinkedIn(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, profile)
 }
 
+func (a *API) ConnectPortfolio(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserIDFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var req struct {
+		URL string `json:"url"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "portfolio url is required")
+		return
+	}
+
+	url := strings.TrimSpace(req.URL)
+	if url == "" || (!strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://")) {
+		writeError(w, http.StatusBadRequest, "enter a valid portfolio url starting with http:// or https://")
+		return
+	}
+
+	profile, err := a.store.FindProfileByUserID(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "profile not found")
+		return
+	}
+
+	previous := profile.TrustScore.Overall
+	profilesync.ApplyPortfolio(profile, url)
+	a.applySupplementalEvidence(r.Context(), profile)
+	profilesync.FinalizeProfileMetrics(profile)
+
+	if err := a.store.UpdateProfile(r.Context(), profile); err != nil {
+		writeError(w, http.StatusInternalServerError, "could not update profile")
+		return
+	}
+	a.recordScoreChange(r.Context(), profile, previous)
+
+	writeJSON(w, http.StatusOK, profile)
+}
+
 func (a *API) InvitePeerVerification(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {

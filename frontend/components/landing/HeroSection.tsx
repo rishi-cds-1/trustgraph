@@ -10,6 +10,7 @@ import { LottiePlayer } from "@/components/lottie/LottiePlayer";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { RetroGrid } from "@/components/ui/retro-grid";
 import { lottieAssets, lottieSizes } from "@/constants/lottie";
+import { routes } from "@/constants/routes";
 import { heroContent } from "@/lib/data";
 import { gsap } from "@/lib/gsap";
 import { splitChars } from "@/lib/split-chars";
@@ -114,14 +115,14 @@ export function Hero() {
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/evidence"
+            href={routes.onboarding}
             className="inline-flex items-center gap-2 rounded-[14px] bg-accent px-7 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-green)] transition hover:bg-accent-hover"
           >
             {heroContent.primaryCta}
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            href="/evidence/brief?snapshot=rishicds"
+            href={routes.sampleProfile("rishicds")}
             className="inline-flex items-center rounded-[14px] border border-border bg-white px-7 py-3 text-sm font-medium text-[var(--text-primary)] shadow-[var(--shadow-xs)] transition hover:shadow-[var(--shadow-sm)]"
           >
             {heroContent.secondaryCta}

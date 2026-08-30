@@ -84,9 +84,6 @@ func main() {
 		r.Get("/profiles", api.ListProfiles)
 		r.Get("/preview/github/{username}", api.PreviewGitHub)
 		r.Get("/verifications/{token}/confirm", api.ConfirmPeerVerification)
-		r.Post("/evidence/extract-requirements", api.ExtractRequirements)
-		r.Post("/evidence/analyze", api.AnalyzeForRole)
-		r.Get("/evidence/snapshot/{handle}", api.EvidenceSnapshot)
 
 		r.Group(func(r chi.Router) {
 			r.Use(authmw.APIKeyAuth(store))
@@ -122,6 +119,7 @@ func main() {
 			r.Post("/profiles/connect/devpost", api.ConnectDevpost)
 			r.Post("/profiles/connect/devfolio", api.ConnectDevfolio)
 			r.Post("/profiles/connect/linkedin", api.ConnectLinkedIn)
+			r.Post("/profiles/connect/portfolio", api.ConnectPortfolio)
 			r.Post("/profiles/enrich", api.RefreshProfileInsights)
 			r.Get("/enrichment/capabilities", api.EnrichmentCapabilities)
 			r.Get("/profiles/{handle}/recruiter/eligibility", api.RecruiterEligibility)

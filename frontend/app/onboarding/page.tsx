@@ -4,7 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { Navbar } from "@/components/layout/Navbar";
-import { StepPassport, StepPeerVerify, StepScoreReveal } from "@/components/onboarding/OnboardingLaterSteps";
+import { StepPassport, StepPeerVerify } from "@/components/onboarding/OnboardingLaterSteps";
+import { PassportBuilder } from "@/components/onboarding/PassportBuilder";
 import { OnboardingLoading } from "@/components/onboarding/OnboardingLoading";
 import { OnboardingNavFooter } from "@/components/onboarding/OnboardingNavFooter";
 import { OnboardingProgress } from "@/components/onboarding/OnboardingProgress";
@@ -43,6 +44,7 @@ function OnboardingContent() {
   const [soUsername, setSoUsername] = useState("");
   const [devpostUsername, setDevpostUsername] = useState("");
   const [devfolioUrl, setDevfolioUrl] = useState("");
+  const [portfolioUrl, setPortfolioUrl] = useState("");
   const [claimTitle, setClaimTitle] = useState("");
   const [claimURL, setClaimURL] = useState("");
   const [shadowHandle, setShadowHandle] = useState("");
@@ -76,6 +78,9 @@ function OnboardingContent() {
   );
   const hasDevfolio = Boolean(
     profile?.data_sources?.some((s) => s.platform === "devfolio" && s.connected),
+  );
+  const hasPortfolio = Boolean(
+    profile?.data_sources?.some((s) => s.platform === "portfolio" && s.connected),
   );
   const hasLinkedIn = Boolean(
     profile?.data_sources?.some((s) => s.platform === "linkedin" && s.connected),
@@ -311,6 +316,21 @@ function OnboardingContent() {
     }
   }
 
+  async function connectPortfolio() {
+    const token = await getToken();
+    if (!token || !portfolioUrl.trim()) return;
+    setConnecting(true);
+    setError("");
+    try {
+      const updated = await api.connectPortfolio(token, portfolioUrl.trim());
+      setProfile(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not connect portfolio");
+    } finally {
+      setConnecting(false);
+    }
+  }
+
   async function addManualClaim() {
     const token = await getToken();
     if (!token || !claimTitle.trim()) return;
@@ -521,6 +541,8 @@ function OnboardingContent() {
                 setDevpostUsername={setDevpostUsername}
                 devfolioUrl={devfolioUrl}
                 setDevfolioUrl={setDevfolioUrl}
+                portfolioUrl={portfolioUrl}
+                setPortfolioUrl={setPortfolioUrl}
                 claimTitle={claimTitle}
                 setClaimTitle={setClaimTitle}
                 claimURL={claimURL}
@@ -531,6 +553,7 @@ function OnboardingContent() {
                 hasSO={hasSO}
                 hasDevpost={hasDevpost}
                 hasDevfolio={hasDevfolio}
+                hasPortfolio={hasPortfolio}
                 linkedInHandle={linkedInHandle}
                 linkedInVerified={linkedInVerified}
                 linkedinSlug={linkedinSlug}
@@ -540,11 +563,14 @@ function OnboardingContent() {
                 onConnectSO={connectStackOverflow}
                 onConnectDevpost={connectDevpost}
                 onConnectDevfolio={connectDevfolio}
+                onConnectPortfolio={connectPortfolio}
                 onAddClaim={addManualClaim}
               />
             )}
 
-            {wizardStep === 3 && profile && <StepScoreReveal profile={profile} />}
+            {wizardStep === 3 && profile && (
+              <PassportBuilder profile={profile} getToken={getToken} onUpdated={setProfile} />
+            )}
 
             {wizardStep === 4 && profile && (
               <StepPassport

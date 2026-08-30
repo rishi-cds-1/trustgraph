@@ -17,6 +17,7 @@ import {
 
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { MagicCard } from "@/components/ui/magic-card";
+import { routes } from "@/constants/routes";
 import {
   passportDemo,
   passportEvidence,
@@ -100,14 +101,14 @@ export function PassportDemo() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              href="/evidence"
+              href={routes.onboarding}
               className="inline-flex items-center gap-2 rounded-[14px] bg-accent px-6 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-green)] transition hover:bg-accent-hover"
             >
               {passportDemo.cta}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/evidence/brief?snapshot=rishicds"
+              href={routes.sampleProfile("rishicds")}
               className="inline-flex items-center gap-2 rounded-[14px] border border-border bg-white px-6 py-3 text-sm font-medium text-[var(--text-primary)] shadow-[var(--shadow-xs)] transition hover:border-teal/30 hover:shadow-[var(--shadow-sm)]"
             >
               {passportDemo.exampleLink}

@@ -529,6 +529,35 @@ func ApplyLinkedIn(profile *models.Profile, username, displayName string, verifi
 	recomputeScore(profile)
 }
 
+func ApplyPortfolio(profile *models.Profile, url string) {
+	now := time.Now().UTC()
+	url = strings.TrimSpace(url)
+	profile.DataSources = upsertSource(profile.DataSources, models.DataSource{
+		Platform:    "portfolio",
+		ExternalID:  url,
+		Connected:   true,
+		ConnectedAt: now,
+	})
+	profile.Evidence = removePlatformEvidence(profile.Evidence, "portfolio")
+	profile.Evidence = append(profile.Evidence, models.EvidenceItem{
+		Type:       "social_identity",
+		Title:      "Portfolio site linked (self-declared, unverified)",
+		Platform:   "portfolio",
+		Verified:   false,
+		Count:      1,
+		URL:        url,
+		OccurredAt: now,
+	})
+	// Surface the URL to the enrichment pipeline, which scrapes it via
+	// Firecrawl/Tavily to derive career evidence without OAuth.
+	profile.SocialLinks = upsertSocialLink(profile.SocialLinks, models.SocialLink{
+		Platform: "website",
+		URL:      url,
+	})
+	profile.OnboardingStep = maxStep(profile.OnboardingStep, 2)
+	recomputeScore(profile)
+}
+
 func ApplyManualClaim(profile *models.Profile, claimType, title, url string) {
 	now := time.Now().UTC()
 	evidenceType := "claimed_project"

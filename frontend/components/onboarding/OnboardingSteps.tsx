@@ -61,6 +61,15 @@ function DevfolioIcon({ className }: { className?: string }) {
   );
 }
 
+function PortfolioIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3c2.5 2.5 3.75 5.6 3.75 9s-1.25 6.5-3.75 9c-2.5-2.5-3.75-5.6-3.75-9S9.5 5.5 12 3z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function TalkIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -130,7 +139,7 @@ export function StepGitHub({
   );
 }
 
-export type SourceTab = "linkedin" | "stackoverflow" | "devpost" | "devfolio" | "manual";
+export type SourceTab = "linkedin" | "portfolio" | "stackoverflow" | "devpost" | "devfolio" | "manual";
 
 type StepSourcesProps = {
   activeTab: SourceTab;
@@ -141,6 +150,8 @@ type StepSourcesProps = {
   setDevpostUsername: (v: string) => void;
   devfolioUrl: string;
   setDevfolioUrl: (v: string) => void;
+  portfolioUrl: string;
+  setPortfolioUrl: (v: string) => void;
   claimTitle: string;
   setClaimTitle: (v: string) => void;
   claimURL: string;
@@ -151,6 +162,7 @@ type StepSourcesProps = {
   hasSO: boolean;
   hasDevpost: boolean;
   hasDevfolio: boolean;
+  hasPortfolio: boolean;
   linkedInHandle?: string;
   linkedInVerified?: boolean;
   linkedinSlug: string;
@@ -160,11 +172,13 @@ type StepSourcesProps = {
   onConnectSO: () => void;
   onConnectDevpost: () => void;
   onConnectDevfolio: () => void;
+  onConnectPortfolio: () => void;
   onAddClaim: () => void;
 };
 
 const tabs: { id: SourceTab; label: string; hint: string; icon: typeof LinkedInIcon }[] = [
   { id: "linkedin", label: "LinkedIn", hint: "Verify professional identity", icon: LinkedInIcon },
+  { id: "portfolio", label: "Portfolio", hint: "Personal site or blog", icon: PortfolioIcon },
   { id: "stackoverflow", label: "Stack Overflow", hint: "Accepted answers & reputation", icon: StackOverflowIcon },
   { id: "devpost", label: "Devpost", hint: "Hackathons & project wins", icon: DevpostIcon },
   { id: "devfolio", label: "Devfolio", hint: "Hackathons & portfolio", icon: DevfolioIcon },
@@ -181,6 +195,8 @@ export function StepSources(props: StepSourcesProps) {
     setDevpostUsername,
     devfolioUrl,
     setDevfolioUrl,
+    portfolioUrl,
+    setPortfolioUrl,
     claimTitle,
     setClaimTitle,
     claimURL,
@@ -191,6 +207,7 @@ export function StepSources(props: StepSourcesProps) {
     hasSO,
     hasDevpost,
     hasDevfolio,
+    hasPortfolio,
     linkedInHandle,
     linkedInVerified,
     linkedinSlug,
@@ -200,6 +217,7 @@ export function StepSources(props: StepSourcesProps) {
     onConnectSO,
     onConnectDevpost,
     onConnectDevfolio,
+    onConnectPortfolio,
     onAddClaim,
   } = props;
 
@@ -234,12 +252,14 @@ export function StepSources(props: StepSourcesProps) {
         return hasDevpost;
       case "devfolio":
         return hasDevfolio;
+      case "portfolio":
+        return hasPortfolio;
       default:
         return false;
     }
   }
 
-  const connectedCount = [hasLinkedIn, hasSO, hasDevpost, hasDevfolio].filter(Boolean).length;
+  const connectedCount = [hasLinkedIn, hasSO, hasDevpost, hasDevfolio, hasPortfolio].filter(Boolean).length;
   const activeTabMeta = tabs.find((t) => t.id === activeTab);
 
   return (
@@ -256,6 +276,7 @@ export function StepSources(props: StepSourcesProps) {
           <p className="mt-1 text-sm text-muted">
             {[
               hasLinkedIn && (linkedInHandle ? `LinkedIn @${linkedInHandle}` : "LinkedIn"),
+              hasPortfolio && "Portfolio",
               hasSO && "Stack Overflow",
               hasDevpost && "Devpost",
               hasDevfolio && "Devfolio",
@@ -432,6 +453,37 @@ export function StepSources(props: StepSourcesProps) {
                       className="shrink-0"
                     >
                       {connecting ? onboarding.devfolio.connecting : onboarding.devfolio.connect}
+                    </Button>
+                  </InputRow>
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {activeTab === "portfolio" && (
+          <>
+            {hasPortfolio ? (
+              <ConnectedBanner>
+                <p className="font-medium text-teal">{onboarding.sources.portfolioConnected}</p>
+              </ConnectedBanner>
+            ) : (
+              <>
+                <p className={typography.body}>{onboarding.portfolio.description}</p>
+                <div className="mt-4">
+                  <InputRow onSubmit={onConnectPortfolio}>
+                    <input
+                      value={portfolioUrl}
+                      onChange={(e) => setPortfolioUrl(e.target.value)}
+                      placeholder={onboarding.portfolio.placeholder}
+                      className={`flex-1 ${surfaces.inputInline} bg-white`}
+                    />
+                    <Button
+                      onClick={onConnectPortfolio}
+                      disabled={connecting || !portfolioUrl.trim()}
+                      className="shrink-0"
+                    >
+                      {connecting ? onboarding.portfolio.connecting : onboarding.portfolio.connect}
                     </Button>
                   </InputRow>
                 </div>
