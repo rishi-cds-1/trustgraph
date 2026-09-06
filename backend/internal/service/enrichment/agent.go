@@ -36,16 +36,16 @@ func (a *Agent) Tavily() *TavilyClient       { return a.tavily }
 func (a *Agent) Gemini() *GeminiClient       { return a.gemini }
 
 func (a *Agent) GenerateJSON(ctx context.Context, systemPrompt, userPrompt string, maxTokens int) ([]byte, error) {
-	if a.gemini.Enabled() {
-		raw, err := a.gemini.GenerateStructuredJSON(ctx, systemPrompt, userPrompt, maxTokens)
+	if a.nvidia.Enabled() {
+		raw, err := a.nvidia.GenerateStructuredJSON(ctx, systemPrompt, userPrompt, maxTokens)
 		if err == nil {
 			return raw, nil
 		}
-		fmt.Printf("enrichment: gemini failed, trying nvidia fallback: %v\n", err)
+		fmt.Printf("enrichment: nvidia failed, trying gemini fallback: %v\n", err)
 	}
 
-	if a.nvidia.Enabled() {
-		return a.nvidia.GenerateStructuredJSON(ctx, systemPrompt, userPrompt, maxTokens)
+	if a.gemini.Enabled() {
+		return a.gemini.GenerateStructuredJSON(ctx, systemPrompt, userPrompt, maxTokens)
 	}
 
 	return nil, fmt.Errorf("no AI provider available for JSON generation")

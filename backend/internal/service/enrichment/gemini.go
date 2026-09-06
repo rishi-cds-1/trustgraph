@@ -104,13 +104,16 @@ func (c *GeminiClient) generateJSON(ctx context.Context, systemPrompt, userPromp
 		c.model,
 		c.apiKey,
 	)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
-	if err != nil {
-		return nil, err
+	newReq := func() (*http.Request, error) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		return req, nil
 	}
-	req.Header.Set("Content-Type", "application/json")
 
-	res, err := c.httpClient.Do(req)
+	res, err := doWithRetry(ctx, c.httpClient, 2, newReq)
 	if err != nil {
 		return nil, err
 	}

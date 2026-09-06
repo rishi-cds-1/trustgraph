@@ -399,7 +399,7 @@ func (c *Client) FetchReadme(ctx context.Context, owner, repo string) (string, e
 
 func (c *Client) fetchMergedPRCount(ctx context.Context, username string) (int, error) {
 	if c.token == "" {
-		return estimateMergedPRs(username), nil
+		return 0, nil
 	}
 	query := url.QueryEscape(fmt.Sprintf("author:%s type:pr is:merged", username))
 	var raw struct {
@@ -407,14 +407,9 @@ func (c *Client) fetchMergedPRCount(ctx context.Context, username string) (int, 
 	}
 	endpoint := fmt.Sprintf("https://api.github.com/search/issues?q=%s", query)
 	if err := c.getJSON(ctx, endpoint, &raw); err != nil {
-		return estimateMergedPRs(username), nil
+		return 0, nil
 	}
 	return raw.TotalCount, nil
-}
-
-func estimateMergedPRs(username string) int {
-	// Conservative public estimate when search API unavailable.
-	return 12 + len(username)%20
 }
 
 func (c *Client) getJSON(ctx context.Context, endpoint string, dest interface{}) error {

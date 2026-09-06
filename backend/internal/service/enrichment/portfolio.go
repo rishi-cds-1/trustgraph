@@ -190,10 +190,17 @@ Only include work explicitly mentioned in the text. Do not invent employers, met
 
 	var raw []byte
 	var err error
-	if a.gemini != nil && a.gemini.Enabled() {
-		raw, err = a.gemini.GenerateStructuredJSON(ctx, systemPrompt, userPrompt, 2048)
-	} else if a.nvidia != nil && a.nvidia.Enabled() {
+	if a.nvidia != nil && a.nvidia.Enabled() {
 		raw, err = a.nvidia.generateJSON(ctx, systemPrompt, userPrompt, 2048)
+		if err != nil {
+			fmt.Printf("enrichment: nvidia failed, trying gemini fallback: %v\n", err)
+		}
+	}
+	if raw == nil && a.gemini != nil && a.gemini.Enabled() {
+		raw, err = a.gemini.GenerateStructuredJSON(ctx, systemPrompt, userPrompt, 2048)
+	}
+	if raw == nil && err == nil {
+		return nil, fmt.Errorf("no AI provider available for portfolio extraction")
 	}
 	if err != nil {
 		return nil, err

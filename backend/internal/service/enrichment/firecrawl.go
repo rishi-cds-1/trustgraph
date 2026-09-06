@@ -52,14 +52,17 @@ func (c *FirecrawlClient) Scrape(ctx context.Context, pageURL string) (*ScrapeRe
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.firecrawl.dev/v1/scrape", bytes.NewReader(body))
-	if err != nil {
-		return nil, err
+	newReq := func() (*http.Request, error) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.firecrawl.dev/v1/scrape", bytes.NewReader(body))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", "Bearer "+c.apiKey)
+		req.Header.Set("Content-Type", "application/json")
+		return req, nil
 	}
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
-	req.Header.Set("Content-Type", "application/json")
 
-	res, err := c.httpClient.Do(req)
+	res, err := doWithRetry(ctx, c.httpClient, 3, newReq)
 	if err != nil {
 		return nil, err
 	}
