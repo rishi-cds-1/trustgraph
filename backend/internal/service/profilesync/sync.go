@@ -125,6 +125,12 @@ func ApplyGitHub(profile *models.Profile, stats *githubsvc.Stats, verified bool)
 	if stats.User.Name != "" {
 		profile.DisplayName = stats.User.Name
 	}
+	if !profile.CompanyOverride && stats.User.Company != "" {
+		profile.Company = strings.TrimSpace(strings.TrimPrefix(stats.User.Company, "@"))
+	}
+	if !profile.LocationOverride && stats.User.Location != "" {
+		profile.Location = strings.TrimSpace(stats.User.Location)
+	}
 
 	profile.SocialLinks = mapSocialLinks(stats.SocialLinks)
 	profile.GitHubPublicEmail = strings.TrimSpace(stats.User.PublicEmail)

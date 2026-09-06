@@ -22,6 +22,8 @@ type UserProfile struct {
 	AvatarURL       string
 	Bio             string
 	Blog            string
+	Company         string
+	Location        string
 	TwitterUsername string
 	HTMLURL         string
 	PublicEmail     string
@@ -131,6 +133,8 @@ func (c *Client) fetchUser(ctx context.Context, username string) (*UserProfile, 
 		AvatarURL       string    `json:"avatar_url"`
 		Bio             string    `json:"bio"`
 		Blog            string    `json:"blog"`
+		Company         string    `json:"company"`
+		Location        string    `json:"location"`
 		TwitterUsername string    `json:"twitter_username"`
 		HTMLURL         string    `json:"html_url"`
 		PublicRepos     int       `json:"public_repos"`
@@ -154,6 +158,8 @@ func (c *Client) fetchUser(ctx context.Context, username string) (*UserProfile, 
 		AvatarURL:       raw.AvatarURL,
 		Bio:             raw.Bio,
 		Blog:            raw.Blog,
+		Company:         raw.Company,
+		Location:        raw.Location,
 		TwitterUsername: raw.TwitterUsername,
 		HTMLURL:         raw.HTMLURL,
 		PublicRepos:     raw.PublicRepos,

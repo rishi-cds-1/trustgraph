@@ -27,6 +27,8 @@ type AdminProfileRow struct {
 	IsPrivate       bool    `json:"is_private"`
 	OnboardingStep  int     `json:"onboarding_step"`
 	HasUser         bool    `json:"has_user"`
+	Company         string  `json:"company,omitempty"`
+	Location        string  `json:"location,omitempty"`
 }
 
 type AdminUserRow struct {
@@ -97,6 +99,8 @@ func (s *Store) ListProfilesAdmin(ctx context.Context, limit, skip int64) ([]Adm
 			IsPrivate:      p.IsPrivate,
 			OnboardingStep: p.OnboardingStep,
 			HasUser:        !p.UserID.IsZero(),
+			Company:        p.Company,
+			Location:       p.Location,
 		})
 	}
 	return rows, cur.Err()

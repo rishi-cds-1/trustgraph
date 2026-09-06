@@ -97,6 +97,44 @@ func (a *API) AdminRescrapeProfile(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (a *API) AdminUpdateProfileIdentity(w http.ResponseWriter, r *http.Request) {
+	handle := strings.TrimSpace(strings.ToLower(r.PathValue("handle")))
+	profile, err := a.store.FindProfileByHandle(r.Context(), handle)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "profile not found")
+		return
+	}
+
+	var body struct {
+		Company  *string `json:"company"`
+		Location *string `json:"location"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid body")
+		return
+	}
+
+	if body.Company != nil {
+		profile.Company = strings.TrimSpace(*body.Company)
+		profile.CompanyOverride = true
+	}
+	if body.Location != nil {
+		profile.Location = strings.TrimSpace(*body.Location)
+		profile.LocationOverride = true
+	}
+
+	if err := a.store.UpdateProfile(r.Context(), profile); err != nil {
+		writeError(w, http.StatusInternalServerError, "could not save profile")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"handle":  profile.Handle,
+		"message": "Profile identity updated",
+		"profile": profile,
+	})
+}
+
 func githubLoginFromProfile(profile *models.Profile) string {
 	if profile == nil {
 		return ""

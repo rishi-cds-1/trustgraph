@@ -27,7 +27,7 @@ type portfolioExtract struct {
 
 // SupplementSparseEvidence discovers portfolio/LinkedIn work when public GitHub stats under-represent someone.
 func (a *Agent) SupplementSparseEvidence(ctx context.Context, profile *models.Profile) ([]models.EvidenceItem, error) {
-	if profile == nil || !isSparsePublicGitHub(profile) {
+	if profile == nil || !profile.IsClaimed || !isSparsePublicGitHub(profile) {
 		return nil, nil
 	}
 	if !a.firecrawl.Enabled() || !a.aiEnabled() {

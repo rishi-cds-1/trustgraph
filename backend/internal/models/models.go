@@ -170,6 +170,10 @@ type Profile struct {
 	DataSources     []DataSource       `bson:"data_sources" json:"data_sources"`
 	SocialLinks     []SocialLink       `bson:"social_links,omitempty" json:"social_links,omitempty"`
 	GitHubPublicEmail string           `bson:"github_public_email,omitempty" json:"github_public_email,omitempty"`
+	Company         string             `bson:"company,omitempty" json:"company,omitempty"`
+	Location        string             `bson:"location,omitempty" json:"location,omitempty"`
+	CompanyOverride  bool              `bson:"company_override,omitempty" json:"company_override,omitempty"`
+	LocationOverride bool              `bson:"location_override,omitempty" json:"location_override,omitempty"`
 	AIInsight       *ProfileInsight    `bson:"ai_insight,omitempty" json:"ai_insight,omitempty"`
 	RecruiterReport *RecruiterReport   `bson:"recruiter_report,omitempty" json:"recruiter_report,omitempty"`
 	LastRecruiterSearchAt time.Time    `bson:"last_recruiter_search_at,omitempty" json:"last_recruiter_search_at,omitempty"`
@@ -244,6 +248,8 @@ type PublicProfileView struct {
 	Stats               []ProfileStatView    `json:"stats,omitempty"`
 	SocialLinks         []SocialLink         `json:"social_links,omitempty"`
 	GitHubPublicEmail   string               `json:"github_public_email,omitempty"`
+	Company             string               `json:"company,omitempty"`
+	Location            string               `json:"location,omitempty"`
 	AIInsight           *ProfileInsight      `json:"ai_insight,omitempty"`
 	RecruiterReport     *RecruiterReport     `json:"recruiter_report,omitempty"`
 	EnrichedSources     []EnrichedSource     `json:"enriched_sources,omitempty"`

@@ -4,7 +4,9 @@ import type { MotionProps } from "motion/react";
 import { motion } from "motion/react";
 import {
   ArrowRight,
+  Building2,
   ExternalLink,
+  MapPin,
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 
@@ -159,6 +161,8 @@ type ProfileBentoHeroProps = {
   roleSignals?: string[];
   socialLinks: SocialLink[];
   githubPublicEmail?: string;
+  company?: string;
+  location?: string;
   isShadowUnclaimed: boolean;
   isAuthenticatedView: boolean;
   isOwner: boolean;
@@ -178,6 +182,8 @@ export function ProfileBentoHero({
   roleSignals,
   socialLinks,
   githubPublicEmail,
+  company,
+  location,
   isShadowUnclaimed,
   isAuthenticatedView,
   isOwner,
@@ -227,6 +233,22 @@ export function ProfileBentoHero({
                 {headline ||
                   "Verified evidence across public work — one portable reputation link."}
               </p>
+              {(company || location) && (
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+                  {company && (
+                    <span className="inline-flex items-center gap-1">
+                      <Building2 className="h-3 w-3" />
+                      {company}
+                    </span>
+                  )}
+                  {location && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {location}
+                    </span>
+                  )}
+                </div>
+              )}
               <ProfileSocialLinks
                 links={socialLinks}
                 githubEmail={githubPublicEmail}

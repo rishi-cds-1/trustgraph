@@ -458,6 +458,8 @@ func (a *API) toPublicView(ctx context.Context, profile *models.Profile, mode st
 		Stats:               mapProfileStats(service.BuildProfileStats(profile.Evidence)),
 		SocialLinks:         profile.SocialLinks,
 		GitHubPublicEmail:   profile.GitHubPublicEmail,
+		Company:             profile.Company,
+		Location:            profile.Location,
 		AIInsight:           profile.AIInsight,
 		RecruiterReport:     profile.RecruiterReport,
 		EnrichedSources:     profile.EnrichedSources,

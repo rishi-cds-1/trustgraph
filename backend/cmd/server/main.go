@@ -163,6 +163,7 @@ func main() {
 			r.Patch("/admin/disputes/{disputeId}", api.AdminResolveDispute)
 			r.Post("/admin/profiles/{handle}/recruiter-search", api.AdminRerunRecruiterSearch)
 			r.Post("/admin/profiles/{handle}/rescrape", api.AdminRescrapeProfile)
+			r.Patch("/admin/profiles/{handle}/identity", api.AdminUpdateProfileIdentity)
 			r.Get("/admin/newsletter/subscribers", api.AdminListNewsletterSubscribers)
 			r.Post("/admin/newsletter/preview", api.AdminPreviewNewsletter)
 			r.Post("/admin/newsletter/send", api.AdminSendNewsletter)

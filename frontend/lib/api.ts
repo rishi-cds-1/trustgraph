@@ -176,6 +176,8 @@ export type PublicProfile = {
   stats?: ProfileStat[];
   social_links?: SocialLink[];
   github_public_email?: string;
+  company?: string;
+  location?: string;
   ai_insight?: ProfileInsight;
   recruiter_report?: RecruiterReport;
 };
@@ -321,6 +323,8 @@ export type AdminProfileRow = {
   is_private: boolean;
   onboarding_step: number;
   has_user: boolean;
+  company?: string;
+  location?: string;
 };
 
 export type ClaimEligibility = {
@@ -570,6 +574,16 @@ export const api = {
     request<{ handle: string; message: string }>(
       `/v1/admin/profiles/${encodeURIComponent(handle)}/rescrape`,
       { method: "POST" },
+      token,
+    ),
+  adminUpdateProfileIdentity: (
+    token: string,
+    handle: string,
+    body: { company?: string; location?: string },
+  ) =>
+    request<{ handle: string; message: string }>(
+      `/v1/admin/profiles/${encodeURIComponent(handle)}/identity`,
+      { method: "PATCH", body: JSON.stringify(body) },
       token,
     ),
   adminNewsletterSubscribers: (token: string) =>

@@ -39,6 +39,9 @@ export default function AdminPage() {
   const [profileActionMessage, setProfileActionMessage] = useState<string | null>(null);
   const [subscriberCount, setSubscriberCount] = useState(0);
   const [emailReady, setEmailReady] = useState(false);
+  const [identityDrafts, setIdentityDrafts] = useState<
+    Record<string, { company: string; location: string }>
+  >({});
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -147,6 +150,45 @@ export default function AdminPage() {
       setProfiles(profilesRes.profiles ?? []);
     } catch (e) {
       setProfileActionError(e instanceof Error ? e.message : "Rescrape failed");
+    } finally {
+      setProfileActionHandle(null);
+    }
+  }
+
+  function identityDraft(p: AdminProfileRow) {
+    return identityDrafts[p.handle] ?? { company: p.company ?? "", location: p.location ?? "" };
+  }
+
+  function setIdentityDraftField(handle: string, field: "company" | "location", value: string) {
+    setIdentityDrafts((prev) => {
+      const current = prev[handle];
+      const base =
+        current ??
+        (() => {
+          const p = profiles.find((row) => row.handle === handle);
+          return { company: p?.company ?? "", location: p?.location ?? "" };
+        })();
+      return { ...prev, [handle]: { ...base, [field]: value } };
+    });
+  }
+
+  async function saveIdentityField(p: AdminProfileRow, field: "company" | "location") {
+    const token = await getToken();
+    if (!token) return;
+    const draft = identityDraft(p);
+    const current = field === "company" ? p.company ?? "" : p.location ?? "";
+    if (draft[field] === current) return;
+    setProfileActionError(null);
+    setProfileActionMessage(null);
+    setProfileActionHandle(p.handle);
+    try {
+      await api.adminUpdateProfileIdentity(token, p.handle, { [field]: draft[field] });
+      setProfiles((prev) =>
+        prev.map((row) => (row.handle === p.handle ? { ...row, [field]: draft[field] } : row)),
+      );
+      setProfileActionMessage(`Updated ${field} for @${p.handle}`);
+    } catch (e) {
+      setProfileActionError(e instanceof Error ? e.message : `Could not update ${field}`);
     } finally {
       setProfileActionHandle(null);
     }
@@ -305,7 +347,7 @@ export default function AdminPage() {
           {profileActionError && <p className="mt-2 text-sm text-red-600">{profileActionError}</p>}
           {profileActionMessage && <p className="mt-2 text-sm text-teal">{profileActionMessage}</p>}
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[920px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1180px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-border text-muted">
                   <th className="py-2 pr-4 font-medium">Handle</th>
@@ -313,6 +355,8 @@ export default function AdminPage() {
                   <th className="py-2 pr-4 font-medium">Evidence</th>
                   <th className="py-2 pr-4 font-medium">Status</th>
                   <th className="py-2 pr-4 font-medium">Onboarding</th>
+                  <th className="py-2 pr-4 font-medium">Company</th>
+                  <th className="py-2 pr-4 font-medium">Location</th>
                   <th className="py-2 font-medium">Ops</th>
                 </tr>
               </thead>
@@ -337,6 +381,28 @@ export default function AdminPage() {
                       </div>
                     </td>
                     <td className="py-3 pr-4 text-muted">Step {p.onboarding_step}</td>
+                    <td className="py-3 pr-4">
+                      <input
+                        type="text"
+                        value={identityDraft(p).company}
+                        onChange={(e) => setIdentityDraftField(p.handle, "company", e.target.value)}
+                        onBlur={() => void saveIdentityField(p, "company")}
+                        disabled={profileActionHandle === p.handle}
+                        placeholder="—"
+                        className="w-32 rounded border border-border bg-transparent px-2 py-1 text-xs"
+                      />
+                    </td>
+                    <td className="py-3 pr-4">
+                      <input
+                        type="text"
+                        value={identityDraft(p).location}
+                        onChange={(e) => setIdentityDraftField(p.handle, "location", e.target.value)}
+                        onBlur={() => void saveIdentityField(p, "location")}
+                        disabled={profileActionHandle === p.handle}
+                        placeholder="—"
+                        className="w-32 rounded border border-border bg-transparent px-2 py-1 text-xs"
+                      />
+                    </td>
                     <td className="py-3">
                       <div className="flex flex-wrap gap-2">
                         <Button

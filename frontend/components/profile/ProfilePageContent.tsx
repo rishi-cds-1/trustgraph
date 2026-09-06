@@ -99,6 +99,8 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
             roleSignals={profile.ai_insight?.role_signals}
             socialLinks={socialLinks}
             githubPublicEmail={profile.github_public_email}
+            company={profile.company}
+            location={profile.location}
             isShadowUnclaimed={isShadowUnclaimed}
             isAuthenticatedView={isAuthenticatedView}
             isOwner={Boolean(profile.is_owner)}

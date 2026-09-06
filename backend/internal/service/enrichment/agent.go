@@ -62,6 +62,9 @@ func (a *Agent) EnrichProfile(ctx context.Context, profile *models.Profile) (*Re
 	if profile == nil {
 		return nil, fmt.Errorf("profile required")
 	}
+	if !profile.IsClaimed {
+		return nil, fmt.Errorf("profile must be claimed before running web-search enrichment")
+	}
 	if !a.aiEnabled() {
 		return nil, fmt.Errorf("NVIDIA_AI_API or GEMINI_API_KEY required for insight generation")
 	}
