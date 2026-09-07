@@ -47,6 +47,7 @@
   --color-border: var(--border-light);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains);
+  --font-display: var(--font-silkscreen);
 }
 
 html {
@@ -122,6 +123,21 @@ html.lenis body {
 .hero-search-input:focus-within {
   border-color: var(--teal);
   box-shadow: 0 10px 40px rgba(15, 118, 110, 0.12);
+}
+
+@keyframes hero-glow-pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+.hero-glow {
+  animation: hero-glow-pulse 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow {
+    animation: none;
+  }
 }
 
 @keyframes float-decor {

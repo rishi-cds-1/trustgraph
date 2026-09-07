@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useGSAP } from "@gsap/react";
-import { useRef } from "react";
-import { ArrowRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, Files, Globe, Timer, Users } from "lucide-react";
 
 import { HeroGitHubPreview } from "@/components/landing/HeroGitHubPreview";
 import { routes } from "@/constants/routes";
-import { heroContent } from "@/lib/data";
+import { heroContent, stats } from "@/lib/data";
 import { gsap } from "@/lib/gsap";
 import { splitChars } from "@/lib/split-chars";
+import type { LandingStat, StatIcon } from "@/types/trust";
 
 function GithubMark({ className }: { className?: string }) {
   return (
@@ -35,11 +36,194 @@ function StackOverflowMark({ className }: { className?: string }) {
   );
 }
 
+function HeroNetworkBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    let width = 0;
+    let height = 0;
+    let nodes: { x: number; y: number; vx: number; vy: number }[] = [];
+
+    const setup = () => {
+      const rect = canvas.parentElement?.getBoundingClientRect();
+      width = rect?.width ?? window.innerWidth;
+      height = rect?.height ?? window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const count = Math.max(24, Math.min(60, Math.round((width * height) / 24000)));
+      nodes = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.18,
+        vy: (Math.random() - 0.5) * 0.18,
+      }));
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+      const linkDist = Math.min(180, width / 5);
+
+      for (const node of nodes) {
+        if (!reduced) {
+          node.x += node.vx;
+          node.y += node.vy;
+          if (node.x < 0 || node.x > width) node.vx *= -1;
+          if (node.y < 0 || node.y > height) node.vy *= -1;
+          node.x = Math.min(Math.max(node.x, 0), width);
+          node.y = Math.min(Math.max(node.y, 0), height);
+        }
+      }
+
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > linkDist) continue;
+          ctx.strokeStyle = `rgba(123, 225, 59, ${0.16 * (1 - dist / linkDist)})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.stroke();
+        }
+      }
+
+      for (const node of nodes) {
+        ctx.fillStyle = "rgba(123, 225, 59, 0.55)";
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    setup();
+    draw();
+
+    let raf = 0;
+    if (!reduced) {
+      const loop = () => {
+        draw();
+        raf = requestAnimationFrame(loop);
+      };
+      raf = requestAnimationFrame(loop);
+    }
+
+    const onResize = () => setup();
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-hidden />;
+}
+
+const STAT_ICONS: Record<StatIcon, typeof Users> = {
+  users: Users,
+  files: Files,
+  globe: Globe,
+  timer: Timer,
+};
+
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function formatStat(stat: LandingStat, value: number): string {
+  const n = Math.round(value);
+  return `${stat.prefix ?? ""}${n.toLocaleString()}${stat.suffix ?? ""}`;
+}
+
+function StatItem({ stat, index }: { stat: LandingStat; index: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [display, setDisplay] = useState(() =>
+    formatStat(stat, stat.format === "text" ? stat.value : 0),
+  );
+  const Icon = STAT_ICONS[stat.icon];
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || stat.format === "text") return;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setDisplay(formatStat(stat, stat.value));
+      return;
+    }
+
+    let raf = 0;
+    let started = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (started || !entries[0]?.isIntersecting) return;
+        started = true;
+        observer.disconnect();
+
+        const duration = 1500 + index * 80;
+        const startDelay = 480 + index * 90;
+        const startTime = performance.now() + startDelay;
+
+        const tick = (now: number) => {
+          const elapsed = now - startTime;
+          if (elapsed < 0) {
+            raf = requestAnimationFrame(tick);
+            return;
+          }
+          const progress = Math.min(1, elapsed / duration);
+          setDisplay(formatStat(stat, stat.value * easeOutCubic(progress)));
+          if (progress < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      },
+      { threshold: 0.25 },
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [stat, index]);
+
+  return (
+    <div className="hero-stat-item flex flex-col items-center gap-2 text-center" style={{ "--d": `${0.5 + index * 0.08}s` } as React.CSSProperties}>
+      <Icon
+        className="h-[clamp(20px,2.6vw,28px)] w-[clamp(20px,2.6vw,28px)] text-white/85"
+        strokeWidth={1.6}
+      />
+      <span
+        ref={ref}
+        className="font-display text-[clamp(18px,2.2vw,26px)] tracking-[-0.025em] text-white tabular-nums"
+      >
+        {display}
+      </span>
+      <span className="text-[clamp(11px,1.2vw,12.5px)] text-white/45">{stat.label}</span>
+    </div>
+  );
+}
+
 export function Hero() {
   const containerRef = useRef<HTMLElement>(null);
 
   useGSAP(
     () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
       gsap.from(".trust-row-item", {
         opacity: 0,
         y: 10,
@@ -73,70 +257,90 @@ export function Hero() {
         ease: "power2.out",
         delay: 0.65,
       });
+
+      gsap.from(".hero-stat-item", {
+        opacity: 0,
+        y: 14,
+        stagger: 0.08,
+        duration: 0.5,
+        ease: "power2.out",
+        delay: 0.9,
+      });
     },
     { scope: containerRef },
   );
 
   return (
-    <section ref={containerRef} className="relative overflow-hidden bg-[var(--bg-primary)]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(123,225,59,0.14),transparent)]" />
-
-      <div className="relative z-10 mx-auto w-full min-w-0 max-w-3xl px-4 pb-16 pt-20 text-center sm:px-6 sm:pt-24 md:pt-28">
-        <div className="mb-6 inline-flex max-w-full flex-wrap items-center justify-center">
-          <span className="trust-row-item relative z-[3] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-white shadow-[var(--shadow-xs)] transition-transform hover:-translate-y-0.5">
-            <GithubMark className="h-4 w-4 text-[#111111]" />
-          </span>
-          <span className="trust-row-item relative z-[2] -ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-white shadow-[var(--shadow-xs)] transition-transform hover:-translate-y-0.5">
-            <LinkedinMark className="h-4 w-4 text-[#0A66C2]" />
-          </span>
-          <span className="trust-row-item relative z-[1] -ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-white shadow-[var(--shadow-xs)] transition-transform hover:-translate-y-0.5">
-            <StackOverflowMark className="h-4 w-4 text-[#F48024]" />
-          </span>
-          <span className="trust-row-item -ml-3 flex h-9 items-center whitespace-nowrap rounded-full border border-border bg-[var(--bg-surface-secondary)] py-1 pl-6 pr-4 text-xs font-medium text-[var(--text-secondary)] sm:text-sm">
-            Verified across GitHub, LinkedIn &amp; Stack Overflow
-          </span>
+    <>
+      <section
+        ref={containerRef}
+        className="relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-black"
+      >
+        <div className="hero-glow pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_18%,rgba(123,225,59,0.16),transparent_70%)]" />
+        <div className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_30%,#000_40%,transparent_85%)]">
+          <HeroNetworkBackground />
         </div>
 
-        <h1 className="hero-headline mx-auto w-full min-w-0 max-w-[900px] text-[clamp(2rem,9vw,6rem)] font-bold leading-[0.95] tracking-[-0.04em] text-[var(--text-primary)] sm:text-[clamp(2.75rem,7vw,6rem)]">
-          <span className="md:hidden">
-            {heroContent.titleLine1}
-            <br />
-            <span className="text-[var(--text-secondary)]">{heroContent.titleLine2}</span>
-          </span>
-          <span className="hidden md:contents">
-            <span className="block">{splitChars(heroContent.titleLine1)}</span>
-            <span className="block text-[var(--text-secondary)]">
-              {splitChars(heroContent.titleLine2)}
+        <div className="relative z-10 mx-auto flex w-full min-w-0 max-w-3xl flex-1 flex-col items-center justify-center px-4 pb-8 pt-24 text-center sm:px-6 sm:pt-28">
+          <div className="mb-6 inline-flex max-w-full flex-wrap items-center justify-center">
+            <span className="trust-row-item relative z-[3] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/40 bg-[#28282a] p-[5px] transition-transform hover:-translate-y-0.5">
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-white">
+                <GithubMark className="h-3.5 w-3.5 text-[#111111]" />
+              </span>
             </span>
-          </span>
-        </h1>
+            <span className="trust-row-item relative z-[2] -ml-[15px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/40 bg-[#28282a] p-[5px] transition-transform hover:-translate-y-1">
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-white">
+                <LinkedinMark className="h-3.5 w-3.5 text-[#0A66C2]" />
+              </span>
+            </span>
+            <span className="trust-row-item relative z-[1] -ml-[15px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/40 bg-[#28282a] p-[5px] transition-transform hover:-translate-y-0.5">
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-white">
+                <StackOverflowMark className="h-3.5 w-3.5 text-[#F48024]" />
+              </span>
+            </span>
+            <span className="trust-row-item -ml-[15px] flex h-9 items-center whitespace-nowrap rounded-full border border-white/40 bg-[#28282a] py-1 pl-6 pr-4 text-xs font-medium text-[#c4c2c3] sm:text-sm">
+              Verified across GitHub, LinkedIn &amp; Stack Overflow
+            </span>
+          </div>
 
-        <p className="hero-sub mx-auto mt-6 w-full min-w-0 max-w-[580px] text-base font-normal leading-[1.7] text-[var(--text-secondary)] sm:text-lg">
-          {heroContent.subhead}
-        </p>
+          <h1 className="hero-headline font-display mx-auto w-full min-w-0 max-w-[900px] text-[clamp(1.6rem,7vw,4.6rem)] font-normal leading-[1.12] tracking-[-0.04em] text-white sm:text-[clamp(2rem,5.6vw,4.6rem)]">
+            <span className="block">{splitChars(heroContent.titleLine1)}</span>
+            <span className="block text-white/70">{splitChars(heroContent.titleLine2)}</span>
+          </h1>
 
-        <div className="hero-cta mt-10 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href={routes.onboarding}
-            className="inline-flex items-center gap-2 rounded-[14px] bg-accent px-7 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-green)] transition hover:bg-accent-hover"
-          >
-            {heroContent.primaryCta}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href={routes.sampleProfile("rishicds")}
-            className="inline-flex items-center rounded-[14px] border border-border bg-white px-7 py-3 text-sm font-medium text-[var(--text-primary)] shadow-[var(--shadow-xs)] transition hover:shadow-[var(--shadow-sm)]"
-          >
-            {heroContent.secondaryCta}
-          </Link>
+          <p className="hero-sub mx-auto mt-6 w-full min-w-0 max-w-[560px] text-base font-normal leading-[1.55] text-white/60 sm:text-lg">
+            {heroContent.subhead}
+          </p>
+
+          <div className="hero-cta mt-9 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href={routes.onboarding}
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_0_22px_rgba(255,255,255,0.32),0_0_44px_rgba(123,225,59,0.12)] transition hover:-translate-y-0.5 hover:scale-[1.02]"
+            >
+              {heroContent.primaryCta}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href={routes.sampleProfile("rishicds")}
+              className="inline-flex items-center rounded-full border border-white/25 bg-white/5 px-7 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+            >
+              {heroContent.secondaryCta}
+            </Link>
+          </div>
+
+          <p className="mt-4 text-sm text-white/35">{heroContent.proofLine}</p>
         </div>
 
-        <p className="mt-4 text-sm text-[var(--text-muted)]">{heroContent.proofLine}</p>
-
-        <div className="relative z-20 mx-auto mt-10 w-full max-w-2xl">
-          <HeroGitHubPreview />
+        <div className="relative z-10 mx-auto grid w-full max-w-[920px] grid-cols-2 gap-x-4 gap-y-6 px-4 pb-10 sm:grid-cols-4 sm:pb-12">
+          {stats.map((stat, index) => (
+            <StatItem key={stat.label} stat={stat} index={index} />
+          ))}
         </div>
+      </section>
+
+      <div className="relative z-20 mx-auto w-full max-w-2xl px-4 pb-16 pt-10 sm:px-6">
+        <HeroGitHubPreview />
       </div>
-    </section>
+    </>
   );
 }

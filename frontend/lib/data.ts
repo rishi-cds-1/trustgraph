@@ -22,8 +22,7 @@ export const heroContent = {
   badge: "AI Yogen hackathon prototype · Evidence-first recruiting",
   titleLine1: "Turn public technical work",
   titleLine2: "into interview-ready evidence.",
-  subhead:
-    "TrustGraph helps recruiting teams and hiring managers organize public code, research, and projects into role-specific candidate briefs.",
+  subhead: "Evidence over resumes. Signal over noise.",
   primaryCta: "Analyze a GitHub profile",
   secondaryCta: "View sample evidence brief",
   proofLine: "Public sources only. Analysis requires consent. AI organizes evidence; people make decisions.",

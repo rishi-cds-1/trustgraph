@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Silkscreen } from "next/font/google";
 import { Suspense } from "react";
 import { ClerkUserSync } from "@/components/auth/ClerkUserSync";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
@@ -14,6 +14,12 @@ const inter = Inter({
 
 const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
+  subsets: ["latin"],
+});
+
+const silkscreen = Silkscreen({
+  variable: "--font-silkscreen",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -50,7 +56,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrains.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${jetbrains.variable} ${silkscreen.variable} h-full antialiased`}
+    >
       <body className="min-h-full">
         <SmoothScroll>
           <ClerkProvider>
