@@ -111,18 +111,20 @@ html.lenis body {
 }
 
 .hero-search-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-layer-sm), var(--shadow-layer-md), var(--shadow-layer-lg);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
 }
 
 .hero-search-input {
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
 .hero-search-input:focus-within {
-  border-color: var(--teal);
-  box-shadow: 0 10px 40px rgba(15, 118, 110, 0.12);
+  border-color: rgba(123, 225, 59, 0.6);
+  box-shadow: 0 10px 40px rgba(123, 225, 59, 0.15);
 }
 
 @keyframes hero-glow-pulse {

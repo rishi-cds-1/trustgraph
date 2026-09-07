@@ -258,6 +258,14 @@ export function Hero() {
         delay: 0.65,
       });
 
+      gsap.from(".hero-preview", {
+        opacity: 0,
+        y: 16,
+        duration: 0.5,
+        ease: "power2.out",
+        delay: 0.78,
+      });
+
       gsap.from(".hero-stat-item", {
         opacity: 0,
         y: 14,
@@ -329,6 +337,10 @@ export function Hero() {
           </div>
 
           <p className="mt-4 text-sm text-white/35">{heroContent.proofLine}</p>
+
+          <div className="hero-preview mt-10 w-full max-w-2xl">
+            <HeroGitHubPreview />
+          </div>
         </div>
 
         <div className="relative z-10 mx-auto grid w-full max-w-[920px] grid-cols-2 gap-x-4 gap-y-6 px-4 pb-10 sm:grid-cols-4 sm:pb-12">
@@ -337,10 +349,6 @@ export function Hero() {
           ))}
         </div>
       </section>
-
-      <div className="relative z-20 mx-auto w-full max-w-2xl px-4 pb-16 pt-10 sm:px-6">
-        <HeroGitHubPreview />
-      </div>
     </>
   );
 }
