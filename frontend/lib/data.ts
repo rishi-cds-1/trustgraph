@@ -20,8 +20,8 @@ export const navLinks: NavLink[] = [
 
 export const heroContent = {
   badge: "AI Yogen hackathon prototype · Evidence-first recruiting",
-  titleLine1: "Turn public technical work",
-  titleLine2: "into interview-ready evidence.",
+  titleLine1: "Turn your work",
+  titleLine2: "into proof.",
   subhead: "Evidence over resumes. Signal over noise.",
   primaryCta: "Analyze a GitHub profile",
   secondaryCta: "View sample evidence brief",
