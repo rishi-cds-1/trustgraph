@@ -5,13 +5,12 @@ import { Suspense, useEffect, useState } from "react";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { ConnectedSourcesPanel } from "@/components/dashboard/ConnectedSourcesPanel";
 import { Navbar } from "@/components/layout/Navbar";
-import { TrustScoreDisplay } from "@/components/profile/TrustScoreDisplay";
-import { ScoreHistoryChart } from "@/components/profile/ScoreHistoryChart";
+import { RoleStrengths } from "@/components/profile/RoleStrengths";
 import { Button } from "@/components/ui/Button";
 import { Pill } from "@/components/ui/Card";
 import { brand, dashboard, routes } from "@/constants";
 import { layout, states, surfaces, typography } from "@/constants/styles";
-import { ActivityAlert, api, ComparativeInsight, Profile, ScoreHistoryPoint, User } from "@/lib/api";
+import { ActivityAlert, api, ComparativeInsight, Profile, User } from "@/lib/api";
 import { badgeMarkdown, embedIframeSnippet } from "@/lib/badge";
 import { syncAccount } from "@/lib/sync-account";
 
@@ -25,7 +24,6 @@ export default function DashboardPage() {
   const [alerts, setAlerts] = useState<ActivityAlert[]>([]);
   const [insights, setInsights] = useState<ComparativeInsight[]>([]);
   const [insightsLocked, setInsightsLocked] = useState(false);
-  const [history, setHistory] = useState<ScoreHistoryPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [badgeCopied, setBadgeCopied] = useState(false);
@@ -58,15 +56,6 @@ export default function DashboardPage() {
         setAlerts(alertRes.alerts ?? []);
         setInsights(alertRes.insights ?? []);
         setInsightsLocked(Boolean(alertRes.insights_locked));
-
-        if ((res as { plan?: string }).plan === "pro" || res.user.plan === "pro") {
-          try {
-            const hist = await api.scoreHistory(token);
-            setHistory(hist.history ?? []);
-          } catch {
-            setHistory([]);
-          }
-        }
       } catch (err) {
         setLoadError(
           err instanceof Error ? err.message : "Could not load your dashboard. Is the API running?",
@@ -184,27 +173,24 @@ export default function DashboardPage() {
             <div className={`${surfaces.cardPadded} lg:col-span-2 space-y-8`}>
               <div>
                 <div className="flex items-center gap-2">
-                  <Pill verified>{dashboard.trustScore}</Pill>
+                  <Pill verified>{dashboard.strengths}</Pill>
                   {isPro && <Pill verified>Pro</Pill>}
                   {profile.onboarding_step < 5 && <Pill>{dashboard.onboardingIncomplete}</Pill>}
                 </div>
+                <h2 className="mt-4 font-semibold">{dashboard.strengthsTitle}</h2>
+                <p className="mt-1 text-sm text-muted">{dashboard.strengthsSubtitle}</p>
                 <div className="mt-6">
-                  <TrustScoreDisplay score={profile.trust_score} />
+                  <RoleStrengths
+                    capabilities={profile.capabilities}
+                    signals={profile.ai_insight?.role_signals}
+                    limit={4}
+                    emptyFallback={
+                      <p className="text-sm text-muted">
+                        Connect more sources to surface the roles your evidence backs best.
+                      </p>
+                    }
+                  />
                 </div>
-              </div>
-
-              <div>
-                <h2 className="font-semibold">{dashboard.history?.title ?? "Score history"}</h2>
-                {isPro ? (
-                  <div className="mt-4">
-                    <ScoreHistoryChart history={history} />
-                  </div>
-                ) : (
-                  <div className="mt-4">
-                    <p className="text-sm text-muted">Upgrade to Pro to unlock score history and comparative insights.</p>
-                    <Button className="mt-3" onClick={upgradePro}>Upgrade to Pro</Button>
-                  </div>
-                )}
               </div>
             </div>
 

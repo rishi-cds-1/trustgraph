@@ -7,9 +7,8 @@ export const meta = {
     "Turn a public GitHub profile into an interview-ready evidence brief in minutes — every claim links to its source. Free for individuals. Human review required.",
   profileTitle: (name: string) => `${name} — TrustGraph`,
   profileDescription: (score: number, evidenceCount: number) =>
-    `Trust Score ${score.toFixed(0)}/100 · ${evidenceCount} evidence items`,
-  profileOgTitle: (name: string, score: number) =>
-    `${name} — Trust Score ${score.toFixed(0)}/100 · TrustGraph Passport`,
+    `${evidenceCount} evidence-backed signals · Portable Trust Passport on TrustGraph`,
+  profileOgTitle: (name: string) => `${name} — Trust Passport · TrustGraph`,
   profileOgDescription: (input: {
     displayName: string;
     score: number;
@@ -18,13 +17,13 @@ export const meta = {
     isShadow: boolean;
     headline?: string;
   }) => {
-    const { displayName, score, evidenceCount, topCapability, isShadow, headline } = input;
+    const { displayName, evidenceCount, topCapability, isShadow, headline } = input;
     const capability = topCapability ? ` · Top strength: ${topCapability}` : "";
     const hook = headline
       ? headline.length > 120
         ? `${headline.slice(0, 117)}…`
         : headline
-      : `${displayName} scores ${score.toFixed(0)}/100 on TrustGraph with ${evidenceCount} evidence-backed signals${capability}.`;
+      : `${displayName} on TrustGraph — ${evidenceCount} evidence-backed signals${capability}.`;
     const cta = isShadow
       ? " Unclaimed profile — verify your GitHub and claim your free Trust Passport."
       : " Portable reputation you can share anywhere. Get your own Trust Passport →";
@@ -393,8 +392,8 @@ export const onboarding = {
     claim: "Claim shadow profile",
   },
   score: {
-    title: "Step 3 — Your trust score",
-    description: "Based on your connected evidence. Scores update automatically as you add sources.",
+    title: "Step 3 — Your role strengths",
+    description: "Based on your connected evidence — the engineering roles your public work backs best. Updates automatically as you add sources.",
   },
   passport: {
     title: "Step 4 — Copy your Trust Passport",
@@ -435,7 +434,9 @@ export const dashboard = {
     subtitle: "Complete onboarding to create your Trust Passport.",
     cta: "Start onboarding",
   },
-  trustScore: "Trust Score",
+  strengths: "Role strengths",
+  strengthsTitle: "Where you're strong",
+  strengthsSubtitle: "The engineering roles your verified evidence backs best.",
   onboardingIncomplete: "Onboarding incomplete",
   passport: {
     title: "Trust Passport",
@@ -480,6 +481,12 @@ export const profile = {
     title: "Top capabilities",
     topFiveTitle: "Top 5 capabilities & ideal role",
     evidenceSuffix: "evidence items",
+  },
+  strengths: {
+    railLabel: "Roles they may be strong in",
+    passportTitle: "Where they're strong",
+    recruiterTitle: "Roles they may be strong for",
+    subtitle: "Derived from verified public evidence — not a self-reported score.",
   },
   score: {
     label: "Trust score",

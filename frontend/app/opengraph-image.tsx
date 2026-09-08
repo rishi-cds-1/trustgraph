@@ -156,20 +156,39 @@ export default function Image() {
             <div
               style={{
                 display: "flex",
-                alignItems: "baseline",
-                gap: 8,
+                flexDirection: "column",
+                gap: 10,
                 background: "#FFE9EA",
                 borderRadius: 16,
                 padding: "16px 18px",
                 marginBottom: 20,
               }}
             >
-              <div style={{ fontSize: 16, color: "#C4000E", fontWeight: 600 }}>Trust Score</div>
-              <div style={{ fontSize: 44, fontWeight: 800, color: "#C4000E" }}>88</div>
-              <div style={{ fontSize: 18, color: "#C4000E" }}>/100</div>
+              <div style={{ fontSize: 13, color: "#C4000E", fontWeight: 700, letterSpacing: "0.04em" }}>
+                STRONG FOR
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {["Backend Engineer", "Full-Stack", "ML / AI"].map((r) => (
+                  <div
+                    key={r}
+                    style={{
+                      display: "flex",
+                      background: "#FFFFFF",
+                      color: "#C4000E",
+                      border: "1px solid #F3C9CC",
+                      borderRadius: 999,
+                      padding: "6px 12px",
+                      fontSize: 14,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {r}
+                  </div>
+                ))}
+              </div>
             </div>
             <div style={{ fontSize: 13, color: "#777777", lineHeight: 1.5 }}>
-              88 merged PRs · 37 repos · Explainable dimensions · README badge
+              88 merged PRs · 37 repos · Evidence-backed · README badge
             </div>
           </div>
         </div>

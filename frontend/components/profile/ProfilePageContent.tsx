@@ -18,6 +18,7 @@ import {
   ProfileBentoGrid,
   ProfileBentoHero,
 } from "@/components/profile/ProfileBento";
+import { HeroVideoBackground } from "@/components/landing/HeroVideoBackground";
 import { ProfileAIInsights } from "@/components/profile/ProfileAIInsights";
 import { ProfileRecruiterReport } from "@/components/profile/ProfileRecruiterReport";
 import { ProfileStatsGrid } from "@/components/profile/ProfileStatsGrid";
@@ -134,11 +135,6 @@ export function ProfilePageContent({
   const evidence = profile.evidence ?? [];
   const stats = profile.stats ?? [];
   const socialLinks = profile.social_links ?? [];
-  const hasDimensions = Boolean(
-    profile.trust_score.dimensions &&
-      (profile.trust_score.dimensions.evidence_depth > 0 ||
-        profile.trust_score.dimensions.consistency > 0),
-  );
 
   const hasTimeline = isAuthenticatedView && (profile.timeline?.length ?? 0) > 0;
 
@@ -162,6 +158,11 @@ export function ProfilePageContent({
 
   return (
     <main className={`${layout.page} relative pt-24 pb-10`}>
+      {/* Cover banner: the hero video fades into the page behind the passport top. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 overflow-hidden">
+        <HeroVideoBackground className="opacity-25" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-surface/70 to-surface" />
+      </div>
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-20" />
 
       {enriching && (
@@ -209,7 +210,7 @@ export function ProfilePageContent({
               displayName={profile.display_name}
               headline={profile.headline}
               avatarUrl={profile.avatar_url}
-              trustScore={profile.trust_score}
+              capabilities={profile.capabilities}
               evidenceCount={profile.evidence_count}
               topCapability={profile.capabilities[0]?.name}
               summary={profile.ai_insight?.summary}
@@ -222,7 +223,6 @@ export function ProfilePageContent({
               isAuthenticatedView={isAuthenticatedView}
               isOwner={Boolean(profile.is_owner)}
               loadingAuth={loadingAuth}
-              showScoreBreakdown={hasDimensions || isAuthenticatedView}
               mercariValues={mercariValues}
             />
           </BuildStage>

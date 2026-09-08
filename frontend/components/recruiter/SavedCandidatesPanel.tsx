@@ -53,7 +53,7 @@ export function SavedCandidatesPanel({
               <p className="mt-2 text-xs text-muted">Saved from: &ldquo;{item.saved_from_query}&rdquo;</p>
             )}
             <p className="mt-1 font-mono text-xs text-muted">
-              Trust {item.trust_score.toFixed(0)} · {item.evidence_count} evidence
+              {item.evidence_count} evidence items
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

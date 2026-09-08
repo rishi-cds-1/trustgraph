@@ -151,7 +151,7 @@ export function PassportBuilder({
             displayName={profile.display_name}
             headline={profile.headline}
             avatarUrl={profile.avatar_url}
-            trustScore={profile.trust_score}
+            capabilities={profile.capabilities}
             evidenceCount={profile.evidence_count}
             topCapability={profile.capabilities[0]?.name}
             summary={profile.ai_insight?.summary}
@@ -162,7 +162,6 @@ export function PassportBuilder({
             isAuthenticatedView
             isOwner
             loadingAuth={false}
-            showScoreBreakdown
           />
         </div>
 

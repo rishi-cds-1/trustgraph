@@ -14,14 +14,13 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileClaimPanel } from "@/components/profile/ProfileClaimPanel";
 import { MercariValueStrip } from "@/components/profile/MercariValueStrip";
 import { ProfileSocialLinks } from "@/components/profile/ProfileSocialLinks";
-import { ScoreDimensionBar } from "@/components/profile/ScoreDimensionsExplainer";
+import { RoleStrengths } from "@/components/profile/RoleStrengths";
 import { Button } from "@/components/ui/Button";
 import { Pill } from "@/components/ui/Card";
-import { brand, profile as profileCopy, routes, scoreDimensionMeta } from "@/constants";
+import { brand, profile as profileCopy, routes } from "@/constants";
 import type { SocialLink } from "@/components/profile/ProfileSocialLinks";
-import type { TrustScore } from "@/lib/api";
+import type { Capability } from "@/lib/api";
 import type { MercariValue } from "@/lib/mercariValues";
-import { cn } from "@/lib/utils";
 
 type BentoBlockProps = {
   className?: string;
@@ -60,93 +59,51 @@ export function ProfileBentoGrid({ children }: { children: React.ReactNode }) {
   );
 }
 
-const dimensionConfig = scoreDimensionMeta.map((dim) => ({
-  label: dim.label,
-  key: dim.key,
-  summary: dim.summary,
-}));
-
 function ScoreRail({
-  trustScore,
+  capabilities,
   evidenceCount,
   topCapability,
   roleSignals,
-  showDimensions,
 }: {
-  trustScore: TrustScore;
+  capabilities: Capability[];
   evidenceCount: number;
   topCapability?: string;
   roleSignals?: string[];
-  showDimensions: boolean;
 }) {
-  const topRoles = roleSignals?.slice(0, 5) ?? [];
-
   return (
     <div className="flex h-full flex-col border-t border-border pt-3 md:border-t-0 md:border-l md:pt-0 md:pl-4">
       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-        {profileCopy.score.label}
+        {profileCopy.strengths.railLabel}
       </p>
-      <div className="mt-1 flex items-baseline gap-2">
-        <span className="font-mono text-4xl font-bold leading-none tracking-tight md:text-5xl">
-          {trustScore.overall.toFixed(0)}
-        </span>
-        <span className="font-mono text-xs text-muted">{profileCopy.score.max}</span>
-        {trustScore.delta !== 0 && (
-          <span className="font-mono text-xs text-teal">
-            {trustScore.delta > 0 ? "+" : ""}
-            {trustScore.delta.toFixed(1)}
-          </span>
-        )}
+      <div className="mt-2">
+        <RoleStrengths
+          capabilities={capabilities}
+          signals={roleSignals}
+          limit={3}
+          emptyFallback={
+            topCapability ? (
+              <p className="text-sm font-medium text-[#111111]">{topCapability}</p>
+            ) : (
+              <p className="text-xs leading-snug text-muted">
+                Strengths surface as public evidence is indexed.
+              </p>
+            )
+          }
+        />
       </div>
 
-      <dl className="mt-3 space-y-2 text-[11px]">
+      <dl className="mt-3 space-y-2 border-t border-border pt-3 text-[11px]">
         <div className="flex items-baseline justify-between gap-2">
           <dt className="text-muted">{profileCopy.stats.evidence}</dt>
           <dd className="font-mono font-semibold">{evidenceCount}</dd>
         </div>
-
-        {topRoles.length > 0 ? (
-          <div className="border-t border-border pt-2">
-            <dt className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">
-              {profileCopy.stats.topFiveCapabilities}
-            </dt>
-            <dd className="mt-1.5 space-y-1.5">
-              {topRoles.map((role) => (
-                <p key={role} className="text-[10px] leading-snug text-[#111111]">
-                  {role}
-                </p>
-              ))}
-            </dd>
-          </div>
-        ) : topCapability ? (
-          <div className="flex items-baseline justify-between gap-2 border-t border-border pt-2">
+        {topCapability && (
+          <div className="flex items-baseline justify-between gap-2">
             <dt className="text-muted">{profileCopy.stats.topCapability}</dt>
             <dd className="truncate font-medium">{topCapability}</dd>
           </div>
-        ) : null}
+        )}
       </dl>
-
-      {showDimensions && (
-        <div className="mt-3 space-y-2 border-t border-border pt-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
-            Score breakdown
-          </p>
-          {dimensionConfig.map(({ label, key, summary }) => {
-            const value =
-              trustScore.dimensions[key] ??
-              (key === "impact_signals" ? trustScore.dimensions.trust_ratio : 0) ??
-              0;
-            return (
-              <ScoreDimensionBar
-                key={key}
-                label={label}
-                value={value}
-                summary={topRoles.length > 0 ? undefined : summary}
-              />
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }
@@ -156,7 +113,7 @@ type ProfileBentoHeroProps = {
   displayName: string;
   headline?: string;
   avatarUrl?: string;
-  trustScore: TrustScore;
+  capabilities: Capability[];
   evidenceCount: number;
   topCapability?: string;
   summary?: string;
@@ -169,7 +126,6 @@ type ProfileBentoHeroProps = {
   isAuthenticatedView: boolean;
   isOwner: boolean;
   loadingAuth: boolean;
-  showScoreBreakdown: boolean;
   mercariValues?: MercariValue[];
 };
 
@@ -178,7 +134,7 @@ export function ProfileBentoHero({
   displayName,
   headline,
   avatarUrl,
-  trustScore,
+  capabilities,
   evidenceCount,
   topCapability,
   summary,
@@ -191,7 +147,6 @@ export function ProfileBentoHero({
   isAuthenticatedView,
   isOwner,
   loadingAuth,
-  showScoreBreakdown,
   mercariValues,
 }: ProfileBentoHeroProps) {
   return (
@@ -271,11 +226,10 @@ export function ProfileBentoHero({
 
         <div className="md:col-span-4">
           <ScoreRail
-            trustScore={trustScore}
+            capabilities={capabilities}
             evidenceCount={evidenceCount}
             topCapability={topCapability}
             roleSignals={roleSignals}
-            showDimensions={showScoreBreakdown}
           />
         </div>
       </div>

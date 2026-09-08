@@ -3,6 +3,7 @@ import { ImageResponse } from "next/og";
 import { reservedHandles } from "@/constants";
 import { api } from "@/lib/api";
 import { passportDisplayUrl } from "@/lib/app-url";
+import { inferRoleStrengths } from "@/lib/roles";
 
 export const alt = "TrustGraph Passport";
 export const size = { width: 1200, height: 630 };
@@ -41,7 +42,7 @@ async function loadAvatarSrc(avatarUrl?: string) {
 function TrustGraphCard({
   name,
   handle,
-  score,
+  roles,
   evidenceCount,
   topCap,
   avatarUrl,
@@ -49,7 +50,7 @@ function TrustGraphCard({
 }: {
   name: string;
   handle: string;
-  score?: number;
+  roles?: string[];
   evidenceCount?: number;
   topCap?: string;
   avatarUrl?: string;
@@ -141,26 +142,26 @@ function TrustGraphCard({
             {name}
           </div>
           <div style={{ fontSize: 22, color: "#777777", lineHeight: 1.4 }}>{tagline}</div>
-          {score !== undefined && (
-            <div style={{ display: "flex", gap: 16, marginTop: 8 }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "baseline",
-                  gap: 8,
-                  background: "#FFFFFF",
-                  border: "1px solid #EAEAEA",
-                  borderRadius: 20,
-                  padding: "14px 22px",
-                  boxShadow: "0 8px 20px rgba(0,0,0,0.04)",
-                }}
-              >
-                <span style={{ fontSize: 18, color: "#777777", fontWeight: 600 }}>Trust Score</span>
-                <span style={{ fontSize: 40, fontWeight: 800, color: "#C4000E" }}>
-                  {score.toFixed(0)}
-                </span>
-                <span style={{ fontSize: 20, color: "#A3A3A3" }}>/100</span>
-              </div>
+          {((roles && roles.length > 0) || evidenceCount !== undefined) && (
+            <div style={{ display: "flex", gap: 12, marginTop: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {roles?.map((role) => (
+                <div
+                  key={role}
+                  style={{
+                    display: "flex",
+                    background: "#FFFFFF",
+                    border: "1px solid #EAEAEA",
+                    borderRadius: 20,
+                    padding: "12px 20px",
+                    fontSize: 20,
+                    color: "#C4000E",
+                    fontWeight: 700,
+                    boxShadow: "0 8px 20px rgba(0,0,0,0.04)",
+                  }}
+                >
+                  {role}
+                </div>
+              ))}
               {evidenceCount !== undefined && (
                 <div
                   style={{
@@ -246,11 +247,13 @@ export default async function Image({ params }: PageProps) {
           : "One link answers: can I trust this person? Proof over claims.";
     const avatarSrc = await loadAvatarSrc(profile.avatar_url);
 
+    const roles = inferRoleStrengths(profile.capabilities).map((r) => r.role).slice(0, 3);
+
     return new ImageResponse(
       <TrustGraphCard
         name={profile.display_name}
         handle={profile.handle}
-        score={profile.trust_score.overall}
+        roles={roles}
         evidenceCount={profile.evidence_count}
         topCap={cap?.name}
         avatarUrl={avatarSrc}

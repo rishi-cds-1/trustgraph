@@ -35,7 +35,7 @@ export function buildProfileMetadata(profile: PublicProfile): Metadata {
   const url = passportFullUrl(profile.handle);
   const score = profile.trust_score.overall;
   const top = topCapability(profile.capabilities);
-  const ogTitle = meta.profileOgTitle(profile.display_name, score);
+  const ogTitle = meta.profileOgTitle(profile.display_name);
   const ogDescription = meta.profileOgDescription({
     displayName: profile.display_name,
     score,

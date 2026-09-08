@@ -1,18 +1,12 @@
 "use client";
 
-import { TrustScoreDisplay } from "@/components/profile/TrustScoreDisplay";
+import { RoleStrengths } from "@/components/profile/RoleStrengths";
 import { Button } from "@/components/ui/Button";
 import { OnboardingStepCard } from "@/components/onboarding/OnboardingStepCard";
-import { onboarding, routes, scoreDimensionMeta } from "@/constants";
+import { onboarding, profile as profileCopy, routes } from "@/constants";
 import { surfaces, typography } from "@/constants/styles";
 import { badgeMarkdown } from "@/lib/badge";
 import { api, Profile } from "@/lib/api";
-
-const dimensions = scoreDimensionMeta.map((dim) => ({
-  label: dim.label,
-  hint: dim.summary,
-  description: dim.description,
-}));
 
 export function StepScoreReveal({ profile }: { profile: Profile }) {
   return (
@@ -22,33 +16,29 @@ export function StepScoreReveal({ profile }: { profile: Profile }) {
       description={onboarding.score.description}
     >
       {profile.trust_score ? (
-        <>
-          <div
-            data-tour="score-display"
-            className="rounded-[20px] border border-teal/15 bg-gradient-to-br from-teal-light/30 via-white to-accent-soft/30 p-6 sm:p-8"
-          >
-            <TrustScoreDisplay score={profile.trust_score} />
+        <div
+          data-tour="score-display"
+          className="rounded-[20px] border border-teal/15 bg-gradient-to-br from-teal-light/30 via-white to-accent-soft/30 p-6 sm:p-8"
+        >
+          <p className="text-sm font-semibold">{profileCopy.strengths.passportTitle}</p>
+          <p className="mt-1 text-xs text-muted">{profileCopy.strengths.subtitle}</p>
+          <div className="mt-5 max-w-md">
+            <RoleStrengths
+              capabilities={profile.capabilities}
+              signals={profile.ai_insight?.role_signals}
+              limit={4}
+              emptyFallback={
+                <p className="text-sm text-muted">
+                  Connect more sources to surface the roles your evidence backs best.
+                </p>
+              }
+            />
           </div>
-          <div
-            data-tour="score-dimensions"
-            className="mt-6 grid gap-3 sm:grid-cols-2"
-          >
-            {dimensions.map((dim) => (
-              <div
-                key={dim.label}
-                className="rounded-[16px] border border-border bg-[#FAFAFA] p-4"
-              >
-                <p className="text-sm font-medium">{dim.label}</p>
-                <p className="mt-1 text-xs text-muted">{dim.hint}</p>
-                <p className="mt-2 text-xs leading-relaxed text-muted">{dim.description}</p>
-              </div>
-            ))}
-          </div>
-        </>
+        </div>
       ) : (
         <div className="space-y-4 py-8 text-center">
           <div className="mx-auto h-16 w-16 animate-spin rounded-full border-[3px] border-border border-t-teal" />
-          <p className="text-sm text-muted">Calculating your score from connected evidence…</p>
+          <p className="text-sm text-muted">Analyzing your evidence to surface your strongest roles…</p>
         </div>
       )}
     </OnboardingStepCard>

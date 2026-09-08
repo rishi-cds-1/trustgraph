@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Files, Globe, Timer, Users } from "lucide-react";
 
 import { HeroGitHubPreview } from "@/components/landing/HeroGitHubPreview";
+import { HeroVideoBackground } from "@/components/landing/HeroVideoBackground";
 import { routes } from "@/constants/routes";
 import { heroContent, stats } from "@/lib/data";
 import { gsap } from "@/lib/gsap";
@@ -285,6 +286,8 @@ export function Hero() {
         ref={containerRef}
         className="relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-black"
       >
+        <HeroVideoBackground className="opacity-40" />
+        <div className="pointer-events-none absolute inset-0 bg-black/60" />
         <div className="hero-glow pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_18%,rgba(255,2,17,0.16),transparent_70%)]" />
         <div className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_30%,#000_40%,transparent_85%)]">
           <HeroNetworkBackground />

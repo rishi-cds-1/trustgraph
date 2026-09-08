@@ -4,7 +4,8 @@ import { ExternalLink, Sparkles } from "lucide-react";
 
 import { CandidateActionBar } from "@/components/recruiter/CandidateActionBar";
 import { CandidateForesight } from "@/components/recruiter/CandidateForesight";
-import { scoreDimensionMeta } from "@/constants/score";
+import { RoleStrengths } from "@/components/profile/RoleStrengths";
+import { profile as profileCopy } from "@/constants";
 import { surfaces } from "@/constants/styles";
 import type { CandidateSearchResult } from "@/lib/api";
 import type { ForesightContext } from "@/lib/foresight";
@@ -50,7 +51,6 @@ export function CandidateResultCard({
   const summary = candidate.match_summary || candidate.match_reason;
   const signals = candidate.matched_signals ?? [];
   const highlights = candidate.match_highlights ?? [];
-  const dimensions = candidate.trust_score.dimensions;
 
   return (
     <article className={`${surfaces.cardPadded} overflow-hidden p-0`}>
@@ -107,12 +107,19 @@ export function CandidateResultCard({
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-col items-end gap-3">
-            <div className="rounded-2xl bg-teal-light px-5 py-3 text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-teal">Trust score</p>
-              <p className="text-3xl font-bold text-ink">{candidate.trust_score.overall.toFixed(0)}</p>
-              <p className="mt-1 text-[10px] text-muted">{candidate.evidence_count} evidence items</p>
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            <div className="rounded-2xl border border-border bg-white px-5 py-3 text-right">
+              <p className="text-3xl font-bold text-ink">{candidate.evidence_count}</p>
+              <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted">
+                evidence items
+              </p>
             </div>
+            <RoleStrengths
+              capabilities={candidate.capabilities}
+              variant="chips"
+              limit={2}
+              className="max-w-[15rem] justify-end"
+            />
           </div>
         </div>
       </div>
@@ -198,23 +205,17 @@ export function CandidateResultCard({
         </div>
       )}
 
-      <div className="grid gap-3 px-6 py-5 sm:grid-cols-2 lg:grid-cols-4">
-        {scoreDimensionMeta.map((dim) => {
-          const value = dimensions[dim.key];
-          return (
-            <div key={dim.key} className="rounded-xl border border-border bg-[#FAFAFA] p-3">
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="text-xs font-medium text-ink">{dim.label}</p>
-                <span className="font-mono text-xs font-semibold text-teal">{Math.round(value)}</span>
-              </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#ECECEC]">
-                <div className="h-full rounded-full bg-teal" style={{ width: `${Math.min(100, value)}%` }} />
-              </div>
-              <p className="mt-2 text-[10px] leading-snug text-muted">{dim.summary}</p>
-            </div>
-          );
-        })}
-      </div>
+      {candidate.capabilities && candidate.capabilities.length > 0 && (
+        <div className="border-b border-border px-6 py-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+            {profileCopy.strengths.recruiterTitle}
+          </p>
+          <p className="mt-1 text-[11px] text-muted">{profileCopy.strengths.subtitle}</p>
+          <div className="mt-4 max-w-md">
+            <RoleStrengths capabilities={candidate.capabilities} limit={3} />
+          </div>
+        </div>
+      )}
 
       <CandidateActionBar
         candidate={candidate}
