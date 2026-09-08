@@ -66,6 +66,61 @@ func (a *API) SetAccountType(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]interface{}{"user": user})
 }
 
+// AdminSwitchMode lets an admin flip their OWN account between "recruiter" and
+// "passport" (normal) mode. Unlike SetAccountType it deliberately bypasses the
+// one-way immutability check so an admin can switch back and forth to preview
+// both experiences. This route is gated by RequireAdmin.
+func (a *API) AdminSwitchMode(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserIDFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var req struct {
+		AccountType string `json:"account_type"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	accountType := strings.TrimSpace(strings.ToLower(req.AccountType))
+	if accountType != "passport" && accountType != "recruiter" {
+		writeError(w, http.StatusBadRequest, "account_type must be passport or recruiter")
+		return
+	}
+
+	user, err := a.store.FindUserByID(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "user not found")
+		return
+	}
+
+	set := bson.M{"account_type": accountType}
+	if accountType == "recruiter" {
+		// Admins switching to recruiter mode skip company onboarding — they're
+		// previewing the recruiter workspace, not registering a new company.
+		set["recruiter_onboarding_complete"] = true
+		if strings.TrimSpace(user.HiringSegment) == "" {
+			set["hiring_segment"] = "developer"
+		}
+	}
+	if err := a.store.UpdateUserFields(r.Context(), userID, set); err != nil {
+		writeError(w, http.StatusInternalServerError, "could not switch mode")
+		return
+	}
+
+	user.AccountType = accountType
+	if accountType == "recruiter" {
+		user.RecruiterOnboardingComplete = true
+		if strings.TrimSpace(user.HiringSegment) == "" {
+			user.HiringSegment = "developer"
+		}
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{"user": user})
+}
+
 func (a *API) SetProfessionalSegment(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {

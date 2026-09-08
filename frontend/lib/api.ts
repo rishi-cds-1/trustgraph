@@ -534,6 +534,12 @@ export const api = {
       token,
     ),
   adminStats: (token: string) => request<AdminStats>("/v1/admin/stats", undefined, token),
+  adminSwitchMode: (token: string, accountType: "passport" | "recruiter") =>
+    request<{ user: User }>(
+      "/v1/admin/switch-mode",
+      { method: "POST", body: JSON.stringify({ account_type: accountType }) },
+      token,
+    ),
   adminProfiles: (token: string, offset = 0, limit = 50) =>
     request<{ profiles: AdminProfileRow[]; total: number; limit: number; offset: number }>(
       `/v1/admin/profiles?offset=${offset}&limit=${limit}`,

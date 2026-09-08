@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AuthNav } from "@/components/layout/AuthNav";
 import { AdminNavLink } from "@/components/layout/AdminNavLink";
+import { AdminModeSwitch } from "@/components/layout/AdminModeSwitch";
 import { brand, navigation, routes } from "@/constants";
 import { nav as navStyles } from "@/constants/styles";
 
@@ -17,6 +18,7 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          <AdminModeSwitch />
           <AdminNavLink />
         </div>
         <AuthNav />

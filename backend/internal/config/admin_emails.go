@@ -3,7 +3,7 @@ package config
 import "strings"
 
 func (c *Config) AdminEmails() []string {
-	raw := strings.TrimSpace(getEnv("ADMIN_EMAILS", "notyourcode8@gmail.com,rishipaulstudy@gmail.com"))
+	raw := strings.TrimSpace(getEnv("ADMIN_EMAILS", "notyourcode8@gmail.com,rishipaulstudy@gmail.com,rpaul@mercari.com"))
 	parts := strings.Split(raw, ",")
 	out := make([]string, 0, len(parts))
 	for _, p := range parts {

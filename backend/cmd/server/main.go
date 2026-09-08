@@ -157,6 +157,7 @@ func main() {
 			r.Use(authmw.ResolveClerkUser(store))
 			r.Use(authmw.RequireAdmin(cfg, store))
 			r.Get("/admin/stats", api.AdminStats)
+			r.Post("/admin/switch-mode", api.AdminSwitchMode)
 			r.Get("/admin/profiles", api.AdminListProfiles)
 			r.Get("/admin/users", api.AdminListUsers)
 			r.Patch("/admin/users/{userId}/plan", api.AdminSetUserPlan)
