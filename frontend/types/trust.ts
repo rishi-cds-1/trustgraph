@@ -87,5 +87,7 @@ export interface LandingStat {
   prefix?: string;
   label: string;
   icon: StatIcon;
+  /** Single character rendered in the display font above the value, e.g. "#", "*". */
+  glyph: string;
   format?: "number" | "text";
 }

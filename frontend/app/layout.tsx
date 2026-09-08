@@ -61,6 +61,15 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${jetbrains.variable} ${silkscreen.variable} h-full antialiased`}
     >
+      <head>
+        {/* Retro dot-matrix display font for the homepage hero — served from
+            OnlineWebFonts, a third-party font CDN not otherwise used in this
+            project. Flagged for Mercari's External Service Review. */}
+        <link
+          href="https://db.onlinewebfonts.com/c/8cb707a9b8a73f8a7403336b861c3074?family=BubbledotICG-FinePos"
+          rel="stylesheet"
+        />
+      </head>
       <body className="min-h-full">
         <LoadingScreen />
         <SmoothScroll>

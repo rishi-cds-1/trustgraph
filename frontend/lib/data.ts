@@ -30,10 +30,10 @@ export const heroContent = {
 };
 
 export const stats: LandingStat[] = [
-  { value: 4200, suffix: "+", label: "Profiles", icon: "users" },
-  { value: 840, suffix: "K+", label: "Evidence items", icon: "files" },
-  { value: 63, label: "Countries", icon: "globe" },
-  { value: 60, prefix: "<", suffix: "s", label: "Time to score", icon: "timer", format: "text" },
+  { value: 4200, suffix: "+", label: "Profiles", icon: "users", glyph: "#" },
+  { value: 840, suffix: "K+", label: "Evidence items", icon: "files", glyph: "*" },
+  { value: 63, label: "Countries", icon: "globe", glyph: "@" },
+  { value: 60, prefix: "<", suffix: "s", label: "Time to score", icon: "timer", format: "text", glyph: "<" },
 ];
 
 export const platformLogos = [

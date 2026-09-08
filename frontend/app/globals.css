@@ -41,6 +41,12 @@
   --radius-nav: 20px;
   --color-background: #FFFFFF;
   --color-border: #EAEAEA;
+  /* Video-hero header/trust-row tokens */
+  --nav-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  --pill-dark: #28282a;
+  --trust-bg: #28282a;
+  --trust-border: rgba(255, 255, 255, 0.4);
+  --trust-text: #c4c2c3;
 }
 
 @theme inline {
@@ -62,7 +68,7 @@
   --color-border: var(--border-light);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains);
-  --font-display: var(--font-silkscreen);
+  --font-display: "BubbledotICG-FinePos", var(--font-silkscreen), monospace;
 }
 
 html {
@@ -345,6 +351,206 @@ html.lenis body {
   .flow-rail-y,
   .ai-core-pulse {
     animation: none;
+  }
+}
+
+/* ── Video-hero entrance choreography ── */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.hero-anim {
+  animation: reveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes reveal-pulse {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+    filter: blur(6px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.015);
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.hero-anim-pulse {
+  animation: reveal-pulse 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes headline-fade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-headline-line {
+  animation: headline-fade 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-nav-anim {
+  animation: slide-down 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.hero-overlay-anim {
+  animation: overlay-in 0.28s ease-out both;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hero-menu-anim {
+  animation: menu-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes link-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-link-anim {
+  animation: link-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+.hero-nav-link {
+  position: relative;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.hero-nav-link:hover {
+  opacity: 0.75;
+}
+
+.hero-nav-link.is-active {
+  opacity: 1;
+}
+
+.hero-nav-link.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #111111;
+  box-shadow:
+    -5px 0 0 #111111,
+    5px 0 0 #111111;
+}
+
+#hero-mobile-sheet .hero-nav-link.is-active::after {
+  bottom: 8px;
+}
+
+/* ── Video-hero body ── */
+.hero-trust-row {
+  --trust-size: clamp(36px, 4.5vw, 42px);
+}
+
+.hero-headline {
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  white-space: nowrap;
+}
+
+.hero-section {
+  padding-top: clamp(16px, 2.4vh, 28px);
+  padding-bottom: clamp(16px, 2.4vh, 28px);
+}
+
+@media (max-width: 720px) {
+  .hero-headline {
+    letter-spacing: -0.08em;
+    line-height: 1.05;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero-trust-row {
+    --trust-size: 34px;
+  }
+  .hero-headline {
+    letter-spacing: -0.09em;
+    line-height: 1.04;
+  }
+}
+
+@media (max-height: 700px) {
+  .hero-section {
+    padding-top: clamp(10px, 1.6vh, 16px);
+    padding-bottom: clamp(10px, 1.6vh, 16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-anim,
+  .hero-anim-pulse,
+  .hero-headline-line,
+  .hero-nav-anim,
+  .hero-overlay-anim,
+  .hero-menu-anim,
+  .hero-link-anim {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
 }
 
