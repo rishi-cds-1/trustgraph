@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Inter, JetBrains_Mono, Silkscreen } from "next/font/google";
 import { Suspense } from "react";
 import { ClerkUserSync } from "@/components/auth/ClerkUserSync";
+import { LoadingScreen } from "@/components/providers/LoadingScreen";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { meta } from "@/constants";
 import "./globals.css";
@@ -61,6 +62,7 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrains.variable} ${silkscreen.variable} h-full antialiased`}
     >
       <body className="min-h-full">
+        <LoadingScreen />
         <SmoothScroll>
           <ClerkProvider>
             <Suspense fallback={null}>
