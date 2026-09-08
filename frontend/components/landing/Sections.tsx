@@ -1,6 +1,9 @@
 export { Hero } from "./HeroSection";
 export { LandingNavbar } from "./LandingNavbar";
 export { SocialProof } from "./SocialProof";
+export { EvidenceFlowDiagram } from "./EvidenceFlowDiagram";
+export { WhyMercariDiagram } from "./WhyMercariDiagram";
+export { FutureScope } from "./FutureScope";
 export { FeaturedProfiles } from "./FeaturedProfilesSection";
 export { PassportDemo } from "./PassportDemo";
 export { Problem } from "./Problem";

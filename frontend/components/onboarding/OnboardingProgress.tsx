@@ -53,7 +53,7 @@ export function OnboardingProgress({
                 onClick={() => isClickable && onStepClick?.(stepNum)}
                 className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-all duration-300 ${
                   isCurrent
-                    ? "scale-110 bg-teal text-white shadow-[0_8px_24px_rgba(15,110,104,0.35)] ring-4 ring-teal-light"
+                    ? "scale-110 bg-teal text-white shadow-[0_8px_24px_rgba(196,0,14,0.35)] ring-4 ring-teal-light"
                     : isComplete
                       ? "bg-accent text-[#111]"
                       : "border border-border bg-white text-muted"

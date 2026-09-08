@@ -8,11 +8,15 @@
   --text-primary: #111111;
   --text-secondary: #777777;
   --text-muted: #A3A3A3;
-  --accent: #7BE13B;
-  --accent-hover: #68CB2E;
-  --accent-soft: #EAF8DD;
-  --teal: #0F6E68;
-  --teal-light: #DFF5F1;
+  /* Primary brand accent — Mercari red (was green). Cascades to every
+     text-accent / bg-accent / accent-soft usage across the site. */
+  --accent: #FF0211;
+  --accent-hover: #E00010;
+  --accent-soft: #FFE9EA;
+  /* Secondary/dark brand — deep Mercari red (was teal). Drives bg-teal CTA
+     blocks and text-teal labels site-wide. */
+  --teal: #C4000E;
+  --teal-light: #FFE9EA;
   /* Mercari brand — used by the passport build experience + Mercari-values strip */
   --mercari-red: #FF0211;
   --mercari-red-hover: #E00010;
@@ -21,14 +25,14 @@
   --mercari-magenta: #F5197A;
   --border-light: #EAEAEA;
   --border-soft: #F1F1F1;
-  --glow-green: rgba(123, 225, 59, 0.18);
-  --glow-teal: rgba(15, 110, 104, 0.12);
+  --glow-green: rgba(255,2,17, 0.18);
+  --glow-teal: rgba(196,0,14, 0.12);
   --shadow-soft: rgba(0, 0, 0, 0.08);
   --shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-sm: 0 8px 16px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
-  --shadow-green: 0 10px 20px rgba(123, 225, 59, 0.25);
+  --shadow-green: 0 10px 20px rgba(255,2,17, 0.25);
   --shadow-layer-sm: var(--shadow-xs);
   --shadow-layer-md: var(--shadow-md);
   --shadow-layer-lg: var(--shadow-lg);
@@ -134,8 +138,8 @@ html.lenis body {
 }
 
 .hero-search-input:focus-within {
-  border-color: rgba(123, 225, 59, 0.6);
-  box-shadow: 0 10px 40px rgba(123, 225, 59, 0.15);
+  border-color: rgba(255,2,17, 0.6);
+  box-shadow: 0 10px 40px rgba(255,2,17, 0.15);
 }
 
 @keyframes hero-glow-pulse {
@@ -300,6 +304,47 @@ html.lenis body {
     transform: rotate(calc(var(--angle) * 1deg + 360deg))
       translateY(calc(var(--radius) * -1))
       rotate(calc(var(--angle) * -1deg - 360deg));
+  }
+}
+
+/* ── Narrative-diagram flow rails (Evidence → AI → Passport, Why-Mercari) ── */
+@keyframes flow-dash-x { to { background-position: 18px 0; } }
+@keyframes flow-dash-y { to { background-position: 0 18px; } }
+
+.flow-rail-x {
+  height: 2px;
+  background-image: repeating-linear-gradient(
+    90deg, var(--accent) 0 7px, transparent 7px 18px
+  );
+  background-size: 18px 100%;
+  opacity: 0.85;
+  animation: flow-dash-x 0.75s linear infinite;
+}
+
+.flow-rail-y {
+  width: 2px;
+  background-image: repeating-linear-gradient(
+    180deg, var(--accent) 0 7px, transparent 7px 18px
+  );
+  background-size: 100% 18px;
+  opacity: 0.85;
+  animation: flow-dash-y 0.75s linear infinite;
+}
+
+@keyframes ai-core-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,2,17,0.45), 0 0 32px 4px rgba(255,2,17,0.28); }
+  50% { box-shadow: 0 0 0 14px rgba(255,2,17,0), 0 0 46px 8px rgba(255,2,17,0.42); }
+}
+
+.ai-core-pulse {
+  animation: ai-core-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-rail-x,
+  .flow-rail-y,
+  .ai-core-pulse {
+    animation: none;
   }
 }
 

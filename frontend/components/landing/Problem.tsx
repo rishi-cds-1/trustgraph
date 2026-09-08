@@ -34,8 +34,8 @@ export function Problem() {
                 <BorderBeam
                   size={80}
                   duration={8}
-                  colorFrom="#7BE13B"
-                  colorTo="#0F6E68"
+                  colorFrom="#FF0211"
+                  colorTo="#C4000E"
                   className="opacity-0 transition-opacity group-hover:opacity-100"
                 />
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft">

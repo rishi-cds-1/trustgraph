@@ -13,7 +13,7 @@ export function ShineBorder({
   borderRadius = 20,
   borderWidth = 2,
   duration = 14,
-  shineColor = ["#7BE13B", "#0F6E68"],
+  shineColor = ["#FF0211", "#C4000E"],
   className,
   style,
   children,

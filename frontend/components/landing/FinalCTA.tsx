@@ -37,7 +37,7 @@ export function FinalCTA() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 100%, rgba(123,225,59,0.25), transparent)",
+            "radial-gradient(ellipse 80% 60% at 50% 100%, rgba(255,2,17,0.25), transparent)",
         }}
       />
       <div className="cta-content relative mx-auto max-w-3xl px-6 text-center">

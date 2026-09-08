@@ -69,7 +69,7 @@ export function SkeletonBlock({
     <div
       className={cn(
         "border bg-white p-3 transition-colors duration-300 md:p-4",
-        active ? "border-teal/50 shadow-[0_0_0_1px_rgba(15,110,104,0.15)]" : "border-border",
+        active ? "border-teal/50 shadow-[0_0_0_1px_rgba(196,0,14,0.15)]" : "border-border",
         className,
       )}
     >

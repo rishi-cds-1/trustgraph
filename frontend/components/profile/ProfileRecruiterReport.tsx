@@ -77,7 +77,7 @@ export function ProfileRecruiterReport({
         <div
           className={cn(
             surfaces.positivePanel,
-            "mt-6 border border-accent/30 shadow-[0_8px_24px_rgba(123,225,59,0.12)]",
+            "mt-6 border border-accent/30 shadow-[0_8px_24px_rgba(255,2,17,0.12)]",
           )}
         >
           <div className="flex flex-wrap items-center justify-between gap-3">

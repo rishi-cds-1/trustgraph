@@ -73,7 +73,7 @@ export function SourceTabButton({
         "group flex min-h-[92px] w-full flex-col items-start gap-2.5 rounded-xl border p-4 text-left transition",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal",
         active
-          ? "border-teal bg-teal text-white shadow-[0_8px_24px_rgba(15,110,104,0.22)]"
+          ? "border-teal bg-teal text-white shadow-[0_8px_24px_rgba(196,0,14,0.22)]"
           : connected
             ? "border-teal/35 bg-teal-light/25 hover:-translate-y-0.5 hover:border-teal hover:shadow-sm"
             : "border-border bg-white hover:-translate-y-0.5 hover:border-teal/40 hover:bg-[#FAFAFA] hover:shadow-sm",

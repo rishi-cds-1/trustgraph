@@ -6,21 +6,19 @@ import { LandingSectionMotion } from "@/components/landing/LandingSectionMotion"
 import { meta } from "@/constants";
 import { appBaseUrl } from "@/lib/app-url";
 import {
-  Architecture,
+  EvidenceFlowDiagram,
   FAQ,
   FeaturedProfiles,
   FinalCTA,
+  FutureScope,
   Hero,
-  HowItWorks,
-  IntegrationEcosystem,
   PassportDemo,
   Pricing,
   Principles,
   Problem,
   ScoreExplainer,
   SocialProof,
-  Testimonials,
-  WhyMercari,
+  WhyMercariDiagram,
 } from "@/components/landing/Sections";
 import { fetchFeaturedProfiles } from "@/lib/featuredProfiles";
 
@@ -63,18 +61,16 @@ export default async function HomePage() {
         <main className="w-full min-w-0 overflow-x-clip">
           <Hero />
           <SocialProof />
-          <PassportDemo />
           <Problem />
-          <Architecture />
-          <HowItWorks />
-          <Testimonials />
-          <FeaturedProfiles profiles={profiles} />
+          <EvidenceFlowDiagram />
+          <PassportDemo />
           <ScoreExplainer />
-          <IntegrationEcosystem />
+          <FeaturedProfiles profiles={profiles} />
+          <WhyMercariDiagram />
+          <FutureScope />
           <Pricing />
-          <WhyMercari />
-          <FAQ />
           <Principles />
+          <FAQ />
           <FinalCTA />
         </main>
       </LandingSectionMotion>

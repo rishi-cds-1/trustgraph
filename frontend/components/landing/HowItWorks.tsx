@@ -118,8 +118,8 @@ export function HowItWorks() {
                   <BorderBeam
                     size={100}
                     duration={10}
-                    colorFrom="#7BE13B"
-                    colorTo="#0F6E68"
+                    colorFrom="#FF0211"
+                    colorTo="#C4000E"
                     className="opacity-0 transition-opacity group-hover:opacity-100"
                   />
 

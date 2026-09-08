@@ -15,7 +15,7 @@ export default function Image() {
           flexDirection: "column",
           width: "100%",
           height: "100%",
-          background: "linear-gradient(135deg, #F5F5F5 0%, #EAF8DD 50%, #DFF5F1 100%)",
+          background: "linear-gradient(135deg, #F5F5F5 0%, #FFE9EA 50%, #FFE9EA 100%)",
           padding: "56px 64px",
           fontFamily: "Inter, system-ui, sans-serif",
         }}
@@ -31,13 +31,13 @@ export default function Image() {
             }}
           >
             <div>Trust</div>
-            <div style={{ color: "#0F6E68" }}>Graph</div>
+            <div style={{ color: "#C4000E" }}>Graph</div>
           </div>
           <div
             style={{
               fontSize: 14,
               fontWeight: 600,
-              color: "#0F6E68",
+              color: "#C4000E",
               background: "#FFFFFF",
               border: "1px solid #EAEAEA",
               borderRadius: 999,
@@ -102,13 +102,13 @@ export default function Image() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  background: "#7BE13B",
+                  background: "#FF0211",
                   color: "#111111",
                   borderRadius: 999,
                   padding: "10px 18px",
                   fontSize: 16,
                   fontWeight: 700,
-                  boxShadow: "0 10px 20px rgba(123,225,59,0.25)",
+                  boxShadow: "0 10px 20px rgba(255,2,17,0.25)",
                 }}
               >
                 Free forever
@@ -128,7 +128,7 @@ export default function Image() {
               boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
             }}
           >
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#0F6E68", marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#C4000E", marginBottom: 16 }}>
               TRUST PASSPORT
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
@@ -140,7 +140,7 @@ export default function Image() {
                   width: 56,
                   height: 56,
                   borderRadius: 16,
-                  background: "#0F6E68",
+                  background: "#C4000E",
                   color: "#FFFFFF",
                   fontSize: 22,
                   fontWeight: 700,
@@ -158,15 +158,15 @@ export default function Image() {
                 display: "flex",
                 alignItems: "baseline",
                 gap: 8,
-                background: "#DFF5F1",
+                background: "#FFE9EA",
                 borderRadius: 16,
                 padding: "16px 18px",
                 marginBottom: 20,
               }}
             >
-              <div style={{ fontSize: 16, color: "#0F6E68", fontWeight: 600 }}>Trust Score</div>
-              <div style={{ fontSize: 44, fontWeight: 800, color: "#0F6E68" }}>88</div>
-              <div style={{ fontSize: 18, color: "#0F6E68" }}>/100</div>
+              <div style={{ fontSize: 16, color: "#C4000E", fontWeight: 600 }}>Trust Score</div>
+              <div style={{ fontSize: 44, fontWeight: 800, color: "#C4000E" }}>88</div>
+              <div style={{ fontSize: 18, color: "#C4000E" }}>/100</div>
             </div>
             <div style={{ fontSize: 13, color: "#777777", lineHeight: 1.5 }}>
               88 merged PRs · 37 repos · Explainable dimensions · README badge
@@ -189,13 +189,13 @@ export default function Image() {
             style={{
               display: "flex",
               alignItems: "center",
-              background: "#7BE13B",
+              background: "#FF0211",
               color: "#111111",
               fontSize: 20,
               fontWeight: 700,
               borderRadius: 14,
               padding: "14px 28px",
-              boxShadow: "0 10px 20px rgba(123,225,59,0.25)",
+              boxShadow: "0 10px 20px rgba(255,2,17,0.25)",
             }}
           >
             Claim your passport →

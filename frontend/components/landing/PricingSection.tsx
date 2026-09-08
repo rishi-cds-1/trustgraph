@@ -33,7 +33,7 @@ export function Pricing() {
                       <BorderBeam
                         size={150}
                         duration={6}
-                        colorFrom="#7BE13B"
+                        colorFrom="#FF0211"
                         colorTo="#ffffff"
                         borderWidth={2}
                       />

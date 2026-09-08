@@ -37,11 +37,18 @@ export const BuildStage = forwardRef<HTMLDivElement, BuildStageProps>(function B
 
   return (
     <div ref={ref} className={cn("relative", className)}>
-      <div className={revealed ? "" : "pointer-events-none opacity-0"}>{children}</div>
+      {/* While a stage is still building, collapse its real (tall) content to zero
+          height and show a compact skeleton in normal flow instead. This keeps the
+          whole building layout short enough that all agent cursors stay in view
+          without scrolling; the content expands to full height on reveal. */}
+      <div
+        className={revealed ? "" : "pointer-events-none h-0 overflow-hidden opacity-0"}
+        aria-hidden={!revealed}
+      >
+        {children}
+      </div>
       {!revealed && (
-        <div className="absolute inset-0">
-          <SkeletonBlock label={label} active={active} activeLabel={activeLabel} className="h-full" />
-        </div>
+        <SkeletonBlock label={label} active={active} activeLabel={activeLabel} className="min-h-[76px]" />
       )}
     </div>
   );

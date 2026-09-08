@@ -92,7 +92,7 @@ function HeroNetworkBackground() {
           const dy = nodes[i].y - nodes[j].y;
           const dist = Math.hypot(dx, dy);
           if (dist > linkDist) continue;
-          ctx.strokeStyle = `rgba(123, 225, 59, ${0.16 * (1 - dist / linkDist)})`;
+          ctx.strokeStyle = `rgba(255,2,17, ${0.16 * (1 - dist / linkDist)})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
@@ -102,7 +102,7 @@ function HeroNetworkBackground() {
       }
 
       for (const node of nodes) {
-        ctx.fillStyle = "rgba(123, 225, 59, 0.55)";
+        ctx.fillStyle = "rgba(255,2,17, 0.55)";
         ctx.beginPath();
         ctx.arc(node.x, node.y, 1.6, 0, Math.PI * 2);
         ctx.fill();
@@ -284,7 +284,7 @@ export function Hero() {
         ref={containerRef}
         className="relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-black"
       >
-        <div className="hero-glow pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_18%,rgba(123,225,59,0.16),transparent_70%)]" />
+        <div className="hero-glow pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_18%,rgba(255,2,17,0.16),transparent_70%)]" />
         <div className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_30%,#000_40%,transparent_85%)]">
           <HeroNetworkBackground />
         </div>
@@ -323,7 +323,7 @@ export function Hero() {
           <div className="hero-cta mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link
               href={routes.onboarding}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_0_22px_rgba(255,255,255,0.32),0_0_44px_rgba(123,225,59,0.12)] transition hover:-translate-y-0.5 hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_0_22px_rgba(255,255,255,0.32),0_0_44px_rgba(255,2,17,0.12)] transition hover:-translate-y-0.5 hover:scale-[1.02]"
             >
               {heroContent.primaryCta}
               <ArrowRight className="h-4 w-4" />

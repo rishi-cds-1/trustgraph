@@ -158,7 +158,7 @@ export function HeroGitHubPreview() {
             type="submit"
             disabled={submitting || !username.trim()}
             className={cn(
-              "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent text-black shadow-[0_4px_14px_rgba(123,225,59,0.35)] transition md:h-14 md:w-14 md:rounded-2xl",
+              "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent text-black shadow-[0_4px_14px_rgba(255,2,17,0.35)] transition md:h-14 md:w-14 md:rounded-2xl",
               "hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none",
             )}
             aria-label={lookup.button}

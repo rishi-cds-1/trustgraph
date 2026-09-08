@@ -30,8 +30,8 @@ export function Architecture() {
               <BorderBeam
                 size={80}
                 duration={8}
-                colorFrom={layer.accent ? "#ffffff" : "#7BE13B"}
-                colorTo={layer.accent ? "#7BE13B" : "#0F6E68"}
+                colorFrom={layer.accent ? "#ffffff" : "#FF0211"}
+                colorTo={layer.accent ? "#FF0211" : "#C4000E"}
                 className="opacity-0 transition-opacity group-hover:opacity-100"
               />
               <p className="text-6xl font-bold leading-none opacity-20">{layer.index}</p>

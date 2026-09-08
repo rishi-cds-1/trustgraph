@@ -26,8 +26,8 @@ const STAGES: Omit<CursorStage, "targetRef">[] = [
 
 const STAGE_INTERVAL_MS = 2200;
 
-const ACTIVE_GLOW = "0 0 0 2px rgba(15,110,104,0.55), 0 0 28px 6px rgba(15,110,104,0.28)";
-const NO_GLOW = "0 0 0 0px rgba(15,110,104,0)";
+const ACTIVE_GLOW = "0 0 0 2px rgba(196,0,14,0.55), 0 0 28px 6px rgba(196,0,14,0.28)";
+const NO_GLOW = "0 0 0 0px rgba(196,0,14,0)";
 
 export function PassportBuilder({
   profile,

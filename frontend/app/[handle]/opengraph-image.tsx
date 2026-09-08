@@ -62,7 +62,7 @@ function TrustGraphCard({
         flexDirection: "column",
         width: "100%",
         height: "100%",
-        background: "linear-gradient(135deg, #F5F5F5 0%, #EAF8DD 55%, #DFF5F1 100%)",
+        background: "linear-gradient(135deg, #F5F5F5 0%, #FFE9EA 55%, #FFE9EA 100%)",
         padding: "56px 64px",
         fontFamily: "Inter, system-ui, sans-serif",
       }}
@@ -76,13 +76,13 @@ function TrustGraphCard({
             letterSpacing: "-0.02em",
           }}
         >
-          Trust<span style={{ color: "#0F6E68" }}>Graph</span>
+          Trust<span style={{ color: "#C4000E" }}>Graph</span>
         </div>
         <div
           style={{
             fontSize: 14,
             fontWeight: 600,
-            color: "#0F6E68",
+            color: "#C4000E",
             background: "#FFFFFF",
             border: "1px solid #EAEAEA",
             borderRadius: 999,
@@ -116,7 +116,7 @@ function TrustGraphCard({
               width: 140,
               height: 140,
               borderRadius: 28,
-              background: "#0F6E68",
+              background: "#C4000E",
               color: "#FFFFFF",
               fontSize: 48,
               fontWeight: 700,
@@ -156,7 +156,7 @@ function TrustGraphCard({
                 }}
               >
                 <span style={{ fontSize: 18, color: "#777777", fontWeight: 600 }}>Trust Score</span>
-                <span style={{ fontSize: 40, fontWeight: 800, color: "#0F6E68" }}>
+                <span style={{ fontSize: 40, fontWeight: 800, color: "#C4000E" }}>
                   {score.toFixed(0)}
                 </span>
                 <span style={{ fontSize: 20, color: "#A3A3A3" }}>/100</span>
@@ -181,7 +181,7 @@ function TrustGraphCard({
             </div>
           )}
           {topCap && (
-            <div style={{ fontSize: 18, color: "#0F6E68", fontWeight: 600 }}>
+            <div style={{ fontSize: 18, color: "#C4000E", fontWeight: 600 }}>
               Top capability: {topCap}
             </div>
           )}
@@ -205,13 +205,13 @@ function TrustGraphCard({
           style={{
             display: "flex",
             alignItems: "center",
-            background: "#7BE13B",
+            background: "#FF0211",
             color: "#111111",
             fontSize: 18,
             fontWeight: 700,
             borderRadius: 14,
             padding: "12px 24px",
-            boxShadow: "0 10px 20px rgba(123,225,59,0.25)",
+            boxShadow: "0 10px 20px rgba(255,2,17,0.25)",
           }}
         >
           Claim your Trust Passport →
