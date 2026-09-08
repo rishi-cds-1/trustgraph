@@ -12,6 +12,7 @@ import { RecruiterPromptGuide } from "@/components/recruiter/RecruiterPromptGuid
 import { RecruiterSearchFiltersPanel } from "@/components/recruiter/RecruiterSearchFiltersPanel";
 import { SavedCandidatesPanel } from "@/components/recruiter/SavedCandidatesPanel";
 import { ShortlistForesight } from "@/components/recruiter/ShortlistForesight";
+import { EarlyTalentPanel } from "@/components/recruiter/EarlyTalentPanel";
 import { Button } from "@/components/ui/Button";
 import { routes } from "@/constants";
 import { layout, states, surfaces, typography } from "@/constants/styles";
@@ -27,7 +28,7 @@ import {
 import { syncAccount } from "@/lib/sync-account";
 import { cn } from "@/lib/utils";
 
-type Tab = "search" | "starred" | "company";
+type Tab = "search" | "starred" | "early" | "company";
 
 function RecruiterDashboardContent() {
   const router = useRouter();
@@ -249,6 +250,16 @@ function RecruiterDashboardContent() {
           </button>
           <button
             type="button"
+            onClick={() => setTab("early")}
+            className={cn(
+              "rounded-full px-4 py-2 text-sm font-medium",
+              tab === "early" ? "bg-ink text-white" : "border border-border bg-white text-muted",
+            )}
+          >
+            Early talent
+          </button>
+          <button
+            type="button"
             onClick={() => setTab("company")}
             className={cn(
               "rounded-full px-4 py-2 text-sm font-medium",
@@ -259,7 +270,7 @@ function RecruiterDashboardContent() {
           </button>
         </div>
 
-        {actionMessage && tab === "search" && (
+        {actionMessage && (tab === "search" || tab === "early") && (
           <p className="mb-6 rounded-xl border border-teal/20 bg-teal-light/40 px-4 py-3 text-sm text-ink">
             {actionMessage}
           </p>
@@ -398,6 +409,17 @@ function RecruiterDashboardContent() {
 
         {tab === "starred" && (
           <SavedCandidatesPanel saved={saved} loading={savedLoading} onRemove={unstarSaved} />
+        )}
+
+        {tab === "early" && (
+          <EarlyTalentPanel
+            company={company}
+            onInvite={(candidate) =>
+              setActionMessage(
+                `Invitation to apply sent to ${candidate.display_name} (@${candidate.handle}) — they'll appear in Starred once they accept.`,
+              )
+            }
+          />
         )}
 
         {tab === "company" && (
