@@ -11,6 +11,7 @@ import { HiringSegmentSelector } from "@/components/recruiter/HiringSegmentSelec
 import { RecruiterPromptGuide } from "@/components/recruiter/RecruiterPromptGuide";
 import { RecruiterSearchFiltersPanel } from "@/components/recruiter/RecruiterSearchFiltersPanel";
 import { SavedCandidatesPanel } from "@/components/recruiter/SavedCandidatesPanel";
+import { ShortlistForesight } from "@/components/recruiter/ShortlistForesight";
 import { Button } from "@/components/ui/Button";
 import { routes } from "@/constants";
 import { layout, states, surfaces, typography } from "@/constants/styles";
@@ -371,17 +372,24 @@ function RecruiterDashboardContent() {
                     matching under Filters.
                   </div>
                 ) : (
-                  results.map((candidate, index) => (
-                    <CandidateResultCard
-                      key={candidate.handle}
-                      candidate={candidate}
-                      rank={index + 1}
-                      onToggleStar={toggleStar}
-                      onDeepSearch={runDeepSearch}
-                      starring={starringHandle === candidate.handle}
-                      deepSearching={deepSearchHandle === candidate.handle}
+                  <>
+                    <ShortlistForesight
+                      candidates={results}
+                      ctx={{ parsedQuery: searchMeta?.parsed_query, company }}
                     />
-                  ))
+                    {results.map((candidate, index) => (
+                      <CandidateResultCard
+                        key={candidate.handle}
+                        candidate={candidate}
+                        rank={index + 1}
+                        foresightCtx={{ parsedQuery: searchMeta?.parsed_query, company }}
+                        onToggleStar={toggleStar}
+                        onDeepSearch={runDeepSearch}
+                        starring={starringHandle === candidate.handle}
+                        deepSearching={deepSearchHandle === candidate.handle}
+                      />
+                    ))}
+                  </>
                 )}
               </div>
             )}

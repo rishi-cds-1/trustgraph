@@ -3,9 +3,11 @@
 import { ExternalLink, Sparkles } from "lucide-react";
 
 import { CandidateActionBar } from "@/components/recruiter/CandidateActionBar";
+import { CandidateForesight } from "@/components/recruiter/CandidateForesight";
 import { scoreDimensionMeta } from "@/constants/score";
 import { surfaces } from "@/constants/styles";
 import type { CandidateSearchResult } from "@/lib/api";
+import type { ForesightContext } from "@/lib/foresight";
 import { cn } from "@/lib/utils";
 
 const categoryStyles: Record<string, string> = {
@@ -31,6 +33,7 @@ function categoryLabel(category: string) {
 export function CandidateResultCard({
   candidate,
   rank,
+  foresightCtx,
   onToggleStar,
   onDeepSearch,
   starring,
@@ -38,6 +41,7 @@ export function CandidateResultCard({
 }: {
   candidate: CandidateSearchResult;
   rank: number;
+  foresightCtx?: ForesightContext;
   onToggleStar?: (handle: string, starred: boolean) => void;
   onDeepSearch?: (handle: string) => Promise<void>;
   starring?: boolean;
@@ -112,6 +116,8 @@ export function CandidateResultCard({
           </div>
         </div>
       </div>
+
+      <CandidateForesight candidate={candidate} ctx={foresightCtx} />
 
       {summary && (
         <div className="border-b border-border px-6 py-4">
