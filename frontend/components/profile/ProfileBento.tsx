@@ -12,6 +12,7 @@ import { twMerge } from "tailwind-merge";
 
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileClaimPanel } from "@/components/profile/ProfileClaimPanel";
+import { MercariValueStrip } from "@/components/profile/MercariValueStrip";
 import { ProfileSocialLinks } from "@/components/profile/ProfileSocialLinks";
 import { ScoreDimensionBar } from "@/components/profile/ScoreDimensionsExplainer";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +20,7 @@ import { Pill } from "@/components/ui/Card";
 import { brand, profile as profileCopy, routes, scoreDimensionMeta } from "@/constants";
 import type { SocialLink } from "@/components/profile/ProfileSocialLinks";
 import type { TrustScore } from "@/lib/api";
+import type { MercariValue } from "@/lib/mercariValues";
 import { cn } from "@/lib/utils";
 
 type BentoBlockProps = {
@@ -168,6 +170,7 @@ type ProfileBentoHeroProps = {
   isOwner: boolean;
   loadingAuth: boolean;
   showScoreBreakdown: boolean;
+  mercariValues?: MercariValue[];
 };
 
 export function ProfileBentoHero({
@@ -189,6 +192,7 @@ export function ProfileBentoHero({
   isOwner,
   loadingAuth,
   showScoreBreakdown,
+  mercariValues,
 }: ProfileBentoHeroProps) {
   return (
     <BentoBlock className="col-span-12">
@@ -275,6 +279,10 @@ export function ProfileBentoHero({
           />
         </div>
       </div>
+
+      {mercariValues && mercariValues.length > 0 && (
+        <MercariValueStrip values={mercariValues} />
+      )}
 
       {isShadowUnclaimed && !isOwner ? (
         <div className="mt-3 border-t border-border pt-3">

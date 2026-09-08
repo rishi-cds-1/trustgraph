@@ -19,37 +19,81 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-const CURSOR_A_COLORS = {
-  ring: "border-accent/50",
-  ping: "bg-accent/50",
-  dot: "bg-accent",
-  dotShadow: "shadow-[0_0_16px_3px_rgba(123,225,59,0.55)]",
+type AgentPersona = {
+  name: string;
+  colors: {
+    base: string;
+    ring: string;
+    ping: string;
+    dot: string;
+    dotShadow: string;
+  };
+  sublabels: Record<string, string[]>;
 };
 
-const CURSOR_B_COLORS = {
-  ring: "border-sky-400/50",
-  ping: "bg-sky-400/50",
-  dot: "bg-sky-400",
-  dotShadow: "shadow-[0_0_16px_3px_rgba(56,189,248,0.55)]",
-};
-
-// Cursor A reads as "working the GitHub side"; cursor B reads as "searching the
-// wider web." Each list's final entry is the section's real action name.
-const CURSOR_A_SUBLABELS: Record<string, string[]> = {
+// Each persona's per-section script ends on the real action name; the earlier
+// entries are the "thinking out loud" phrases that scramble in as it works.
+const GITHUB_SUBLABELS: Record<string, string[]> = {
   "Passport hero": ["Connecting to GitHub…", "Verifying identity & headline…"],
   Stats: ["Reading public repositories…", "Tallying verified stats…"],
-  "AI insight synthesis": ["Scanning commit history…", "Synthesizing AI insight…"],
+  "AI insight synthesis": ["Scanning commit history…", "Pulling contribution signals…"],
   Capabilities: ["Parsing repo languages…", "Mapping capabilities…"],
   "Evidence timeline": ["Walking the contribution graph…", "Assembling evidence timeline…"],
 };
 
-const CURSOR_B_SUBLABELS: Record<string, string[]> = {
-  "Passport hero": ["Searching the web…", "Verifying identity & headline…"],
-  Stats: ["Cross-referencing LinkedIn…", "Tallying verified stats…"],
-  "AI insight synthesis": ["Checking Stack Overflow…", "Synthesizing AI insight…"],
-  Capabilities: ["Searching public mentions…", "Mapping capabilities…"],
-  "Evidence timeline": ["Indexing evidence sources…", "Assembling evidence timeline…"],
+const WEB_SUBLABELS: Record<string, string[]> = {
+  "Passport hero": ["Searching the web…", "Cross-checking identity…"],
+  Stats: ["Cross-referencing LinkedIn…", "Confirming the numbers…"],
+  "AI insight synthesis": ["Checking Stack Overflow…", "Gathering public mentions…"],
+  Capabilities: ["Searching public mentions…", "Corroborating skills…"],
+  "Evidence timeline": ["Indexing evidence sources…", "Dating each event…"],
 };
+
+const AI_SUBLABELS: Record<string, string[]> = {
+  "Passport hero": ["Reading profile signals…", "Composing headline…"],
+  Stats: ["Weighing contribution volume…", "Scoring the stats…"],
+  "AI insight synthesis": ["Reasoning over evidence…", "Synthesizing AI insight…"],
+  Capabilities: ["Clustering skills…", "Ranking capabilities…"],
+  "Evidence timeline": ["Ordering by recency…", "Threading the timeline…"],
+};
+
+// Green = GitHub side, sky = wider web, violet = the reasoning agent. They fan
+// out across the passport sections in parallel like a Figma multiplayer room.
+const AGENTS: AgentPersona[] = [
+  {
+    name: "GitHub agent",
+    colors: {
+      base: "#FF0211",
+      ring: "border-[#FF0211]/50",
+      ping: "bg-[#FF0211]/45",
+      dot: "bg-[#FF0211]",
+      dotShadow: "shadow-[0_0_16px_3px_rgba(255,2,17,0.5)]",
+    },
+    sublabels: GITHUB_SUBLABELS,
+  },
+  {
+    name: "Web crawler",
+    colors: {
+      base: "#00A9E0",
+      ring: "border-[#00A9E0]/50",
+      ping: "bg-[#00A9E0]/45",
+      dot: "bg-[#00A9E0]",
+      dotShadow: "shadow-[0_0_16px_3px_rgba(0,169,224,0.5)]",
+    },
+    sublabels: WEB_SUBLABELS,
+  },
+  {
+    name: "Synthesizer",
+    colors: {
+      base: "#F5197A",
+      ring: "border-[#F5197A]/50",
+      ping: "bg-[#F5197A]/45",
+      dot: "bg-[#F5197A]",
+      dotShadow: "shadow-[0_0_16px_3px_rgba(245,25,122,0.5)]",
+    },
+    sublabels: AI_SUBLABELS,
+  },
+];
 
 function subLabelsFor(map: Record<string, string[]>, sectionLabel: string): string[] {
   return map[sectionLabel] ?? ["Searching for evidence…", `Placing ${sectionLabel.toLowerCase()}…`];
@@ -68,32 +112,45 @@ export function PassportBuildCursors({
   onActiveChange: (active: ActiveStage[]) => void;
   onComplete: () => void;
 }) {
-  const [cursorAIndex, setCursorAIndex] = useState<number | null>(null);
-  const [cursorBIndex, setCursorBIndex] = useState<number | null>(null);
-  const [subLabelA, setSubLabelA] = useState<string | null>(null);
-  const [subLabelB, setSubLabelB] = useState<string | null>(null);
+  // How many agents actually take part — never more than there are sections.
+  const agentCount = Math.min(AGENTS.length, Math.max(stages.length, 1));
+
+  const [cursorIndex, setCursorIndex] = useState<(number | null)[]>(() =>
+    Array(agentCount).fill(null),
+  );
+  const [cursorSub, setCursorSub] = useState<(string | null)[]>(() =>
+    Array(agentCount).fill(null),
+  );
   const progressRef = useRef<HTMLDivElement>(null);
   const revealedCount = useRef(0);
   const finishedCursors = useRef(0);
   const done = useRef(false);
 
+  const setIndexAt = (i: number, val: number | null) =>
+    setCursorIndex((prev) => {
+      const next = [...prev];
+      next[i] = val;
+      return next;
+    });
+  const setSubAt = (i: number, val: string | null) =>
+    setCursorSub((prev) => {
+      const next = [...prev];
+      next[i] = val;
+      return next;
+    });
+
   useEffect(() => {
     const active: ActiveStage[] = [];
-    if (cursorAIndex !== null) {
+    cursorIndex.forEach((idx, i) => {
+      if (idx === null) return;
       active.push({
-        index: cursorAIndex,
-        label: subLabelA ?? subLabelsFor(CURSOR_A_SUBLABELS, stages[cursorAIndex].label)[0],
+        index: idx,
+        label: cursorSub[i] ?? subLabelsFor(AGENTS[i].sublabels, stages[idx].label)[0],
       });
-    }
-    if (cursorBIndex !== null) {
-      active.push({
-        index: cursorBIndex,
-        label: subLabelB ?? subLabelsFor(CURSOR_B_SUBLABELS, stages[cursorBIndex].label)[0],
-      });
-    }
+    });
     onActiveChange(active);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cursorAIndex, cursorBIndex, subLabelA, subLabelB]);
+  }, [cursorIndex, cursorSub]);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -105,75 +162,80 @@ export function PassportBuildCursors({
 
     let cancelled = false;
     const timeouts: ReturnType<typeof setTimeout>[] = [];
-    const listA = stages.map((_, i) => i).filter((i) => i % 2 === 0);
-    const listB = stages.map((_, i) => i).filter((i) => i % 2 === 1);
+
+    // Round-robin the sections across the agents so they work simultaneously.
+    const lists: number[][] = Array.from({ length: agentCount }, () => []);
+    stages.forEach((_, i) => lists[i % agentCount].push(i));
 
     const totalTargetMs = MIN_TOTAL_MS + Math.random() * (MAX_TOTAL_MS - MIN_TOTAL_MS);
-    const longerLen = Math.max(listA.length, listB.length, 1);
+    const longerLen = Math.max(...lists.map((l) => l.length), 1);
     const perStepMs = totalTargetMs / longerLen;
     const travelMs = clamp(perStepMs * 0.28, 450, 900);
     const gapMs = clamp(perStepMs * 0.08, 100, 220);
     const dwellMs = Math.max(perStepMs - travelMs - gapMs, 900);
 
+    const activeLists = lists.filter((l) => l.length > 0).length;
+
     function finishCursor() {
       finishedCursors.current += 1;
-      if (finishedCursors.current >= 2 && !done.current) {
+      if (finishedCursors.current >= activeLists && !done.current) {
         done.current = true;
         onComplete();
       }
     }
 
-    function runList(
-      list: number[],
-      setIndex: (i: number | null) => void,
-      setSubLabel: (label: string | null) => void,
-      subLabelMap: Record<string, string[]>,
-    ) {
+    function runList(cursorId: number, list: number[]) {
+      const subLabelMap = AGENTS[cursorId].sublabels;
       let pos = 0;
+      // A touch of per-cursor jitter so the agents don't move in lockstep.
+      const jitter = () => gsap.utils.random(-90, 90);
+
       function step() {
         if (cancelled) return;
         if (pos >= list.length) {
-          setIndex(null);
-          setSubLabel(null);
+          setIndexAt(cursorId, null);
+          setSubAt(cursorId, null);
           finishCursor();
           return;
         }
         const idx = list[pos];
-        setIndex(idx);
+        setIndexAt(cursorId, idx);
         const subLabels = subLabelsFor(subLabelMap, stages[idx].label);
-        setSubLabel(subLabels[0]);
+        setSubAt(cursorId, subLabels[0]);
 
         const perSub = dwellMs / subLabels.length;
         subLabels.forEach((text, i) => {
           if (i === 0) return;
           timeouts.push(
             setTimeout(() => {
-              if (!cancelled) setSubLabel(text);
+              if (!cancelled) setSubAt(cursorId, text);
             }, travelMs + i * perSub),
           );
         });
 
         timeouts.push(
-          setTimeout(() => {
-            if (cancelled) return;
-            onStageRevealed(idx);
-            revealedCount.current += 1;
-            if (progressRef.current) {
-              const pct = Math.min((revealedCount.current / stages.length) * 100, 100);
-              gsap.to(progressRef.current, { width: `${pct}%`, duration: 0.4, ease: "power2.out" });
-            }
-            pos += 1;
-            timeouts.push(setTimeout(step, gapMs));
-          }, travelMs + dwellMs),
+          setTimeout(
+            () => {
+              if (cancelled) return;
+              onStageRevealed(idx);
+              revealedCount.current += 1;
+              if (progressRef.current) {
+                const pct = Math.min((revealedCount.current / stages.length) * 100, 100);
+                gsap.to(progressRef.current, { width: `${pct}%`, duration: 0.4, ease: "power2.out" });
+              }
+              pos += 1;
+              timeouts.push(setTimeout(step, gapMs));
+            },
+            Math.max(travelMs + dwellMs + jitter(), 700),
+          ),
         );
       }
       step();
     }
 
-    if (listA.length > 0) runList(listA, setCursorAIndex, setSubLabelA, CURSOR_A_SUBLABELS);
-    else finishCursor();
-    if (listB.length > 0) runList(listB, setCursorBIndex, setSubLabelB, CURSOR_B_SUBLABELS);
-    else finishCursor();
+    lists.forEach((list, cursorId) => {
+      if (list.length > 0) runList(cursorId, list);
+    });
 
     return () => {
       cancelled = true;
@@ -181,9 +243,6 @@ export function PassportBuildCursors({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const stageA = cursorAIndex !== null ? stages[cursorAIndex] : null;
-  const stageB = cursorBIndex !== null ? stages[cursorBIndex] : null;
 
   return (
     <>
@@ -193,26 +252,30 @@ export function PassportBuildCursors({
       <div className="fixed left-1/2 top-4 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border border-teal/15 bg-white px-4 py-1.5 shadow-md">
         <span className="h-2 w-2 animate-pulse rounded-full bg-teal" />
         <p className="text-xs font-medium text-teal">
-          Assembling {displayName}&apos;s passport from public evidence…
+          {agentCount} agents assembling {displayName}&apos;s passport from public evidence…
         </p>
       </div>
 
-      <AgentCursor
-        stage={
-          stageA
-            ? { label: subLabelA ?? subLabelsFor(CURSOR_A_SUBLABELS, stageA.label)[0], targetRef: stageA.ref }
-            : null
-        }
-        colors={CURSOR_A_COLORS}
-      />
-      <AgentCursor
-        stage={
-          stageB
-            ? { label: subLabelB ?? subLabelsFor(CURSOR_B_SUBLABELS, stageB.label)[0], targetRef: stageB.ref }
-            : null
-        }
-        colors={CURSOR_B_COLORS}
-      />
+      {Array.from({ length: agentCount }).map((_, i) => {
+        const idx = cursorIndex[i];
+        const stage = idx !== null ? stages[idx] : null;
+        const agent = AGENTS[i];
+        return (
+          <AgentCursor
+            key={i}
+            name={agent.name}
+            colors={agent.colors}
+            stage={
+              stage
+                ? {
+                    label: cursorSub[i] ?? subLabelsFor(agent.sublabels, stage.label)[0],
+                    targetRef: stage.ref,
+                  }
+                : null
+            }
+          />
+        );
+      })}
     </>
   );
 }

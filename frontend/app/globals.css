@@ -13,6 +13,12 @@
   --accent-soft: #EAF8DD;
   --teal: #0F6E68;
   --teal-light: #DFF5F1;
+  /* Mercari brand — used by the passport build experience + Mercari-values strip */
+  --mercari-red: #FF0211;
+  --mercari-red-hover: #E00010;
+  --mercari-red-soft: #FFE9EA;
+  --mercari-cyan: #00A9E0;
+  --mercari-magenta: #F5197A;
   --border-light: #EAEAEA;
   --border-soft: #F1F1F1;
   --glow-green: rgba(123, 225, 59, 0.18);
@@ -44,6 +50,11 @@
   --color-accent-soft: var(--accent-soft);
   --color-teal: var(--teal);
   --color-teal-light: var(--teal-light);
+  --color-mercari-red: var(--mercari-red);
+  --color-mercari-red-hover: var(--mercari-red-hover);
+  --color-mercari-red-soft: var(--mercari-red-soft);
+  --color-mercari-cyan: var(--mercari-cyan);
+  --color-mercari-magenta: var(--mercari-magenta);
   --color-border: var(--border-light);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains);

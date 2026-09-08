@@ -429,6 +429,10 @@ export const api = {
     request<GitHubPreview>(`/v1/preview/github/${encodeURIComponent(username.trim().toLowerCase())}`),
   getProfile: (handle: string, token?: string) =>
     request<PublicProfile>(`/v1/profiles/${handle}`, undefined, token),
+  // Kicks off (or reuses) cross-site enrichment for a live passport preview and
+  // returns the richer profile once it lands — the "keep building" background step.
+  buildPassport: (handle: string, token?: string) =>
+    request<PublicProfile>(`/v1/profiles/${encodeURIComponent(handle)}/build`, { method: "POST" }, token),
   getTrustScore: (handle: string, mode = "full") =>
     request<{ handle: string; trust_score: TrustScore }>(`/v1/trust-score?handle=${handle}&mode=${mode}`),
   connectGitHub: (token: string, username: string) =>

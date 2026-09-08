@@ -140,7 +140,14 @@ func discoverPortfolioURLs(profile *models.Profile, publicEmail string) []linkEn
 
 func portfolioSearchQuery(profile *models.Profile, publicEmail string) string {
 	name := strings.TrimSpace(profile.DisplayName)
-	parts := []string{name, profile.Handle, "developer portfolio"}
+	parts := []string{name}
+	// Disambiguate with the company when we know it; otherwise lean on the handle.
+	if company := strings.TrimSpace(profile.Company); company != "" {
+		parts = append(parts, company)
+	} else {
+		parts = append(parts, profile.Handle)
+	}
+	parts = append(parts, "linkedin OR portfolio OR blog")
 	if publicEmail != "" {
 		parts = append(parts, publicEmail)
 	}

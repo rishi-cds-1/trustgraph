@@ -97,6 +97,7 @@ func main() {
 			r.Use(authmw.OptionalResolveClerkUser(store))
 			r.Get("/profiles/{handle}", api.GetProfile)
 			r.Get("/profiles/{handle}/insights", api.GetProfileInsights)
+			r.Post("/profiles/{handle}/build", api.BuildPassport)
 		})
 
 		r.Group(func(r chi.Router) {

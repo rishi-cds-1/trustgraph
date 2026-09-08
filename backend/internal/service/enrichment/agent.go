@@ -65,6 +65,22 @@ func (a *Agent) EnrichProfile(ctx context.Context, profile *models.Profile) (*Re
 	if !profile.IsClaimed {
 		return nil, fmt.Errorf("profile must be claimed before running web-search enrichment")
 	}
+	return a.enrichProfileCore(ctx, profile)
+}
+
+// BuildPassportEnrichment runs the same cross-site search/scrape/insight
+// pipeline as EnrichProfile but WITHOUT requiring the profile to be claimed.
+// It powers the live passport preview, which shows the GitHub-only shell
+// immediately and then keeps building itself in the background from LinkedIn,
+// a portfolio/blog, Stack Overflow, etc.
+func (a *Agent) BuildPassportEnrichment(ctx context.Context, profile *models.Profile) (*Result, error) {
+	if profile == nil {
+		return nil, fmt.Errorf("profile required")
+	}
+	return a.enrichProfileCore(ctx, profile)
+}
+
+func (a *Agent) enrichProfileCore(ctx context.Context, profile *models.Profile) (*Result, error) {
 	if !a.aiEnabled() {
 		return nil, fmt.Errorf("NVIDIA_AI_API or GEMINI_API_KEY required for insight generation")
 	}
@@ -113,13 +129,27 @@ func (a *Agent) EnrichProfile(ctx context.Context, profile *models.Profile) (*Re
 	}
 
 	if a.tavily.Enabled() {
-		query := enrichmentSearchQuery(profile, publicEmail)
-		hits, err := a.tavily.Search(ctx, query, 4)
-		if err == nil {
-			hits = filterSearchHits(profile, hits)
-			corpus.WriteString("\n--- Web search (Tavily) ---\n")
-			for _, hit := range hits {
-				corpus.WriteString(fmt.Sprintf("- %s (%s): %s\n", hit.Title, hit.URL, hit.Content))
+		// Fan out from the GitHub identity to the rest of the person's public
+		// footprint (LinkedIn, portfolio, blog, Stack Overflow, Devpost, ...).
+		queries := crossSiteQueries(profile, publicEmail)
+		if len(queries) > 5 {
+			queries = queries[:5]
+		}
+		seenHit := map[string]bool{}
+		var crossSiteHits []SearchHit
+		corpus.WriteString("\n--- Web search (Tavily) ---\n")
+		for _, query := range queries {
+			hits, err := a.tavily.Search(ctx, query, 4)
+			if err != nil {
+				continue
+			}
+			for _, hit := range filterSearchHits(profile, hits) {
+				if hit.URL == "" || seenHit[hit.URL] {
+					continue
+				}
+				seenHit[hit.URL] = true
+				crossSiteHits = append(crossSiteHits, hit)
+				corpus.WriteString(fmt.Sprintf("- [%s] %s (%s): %s\n", inferPlatform(hit.URL), hit.Title, hit.URL, hit.Content))
 				sources = append(sources, models.EnrichedSource{
 					Platform:  "web",
 					URL:       hit.URL,
@@ -128,6 +158,37 @@ func (a *Agent) EnrichProfile(ctx context.Context, profile *models.Profile) (*Re
 					ScrapedAt: now,
 				})
 			}
+		}
+
+		// Deep-read a few of the strongest cross-site identity pages so they
+		// become corroborated evidence rather than just context links. Generic
+		// web and GitHub URLs stay context-only (GitHub already has API data),
+		// and every URL still passes the identity-safety filters.
+		scrapeBudget := 3
+		for _, hit := range crossSiteHits {
+			if scrapeBudget <= 0 || !a.firecrawl.Enabled() {
+				break
+			}
+			platform := inferPlatform(hit.URL)
+			if platform == "web" || platform == "github" {
+				continue
+			}
+			if !shouldIncludeWebSource(profile, hit.URL) || !shouldScrapeRecruiterURL(hit.URL) {
+				continue
+			}
+			scraped, err := a.firecrawl.Scrape(ctx, hit.URL)
+			if err != nil {
+				continue
+			}
+			scrapeBudget--
+			sources = append(sources, models.EnrichedSource{
+				Platform:  platform,
+				URL:       hit.URL,
+				Title:     scraped.Title,
+				Snippet:   truncate(scraped.Markdown, 1200),
+				ScrapedAt: now,
+			})
+			corpus.WriteString(fmt.Sprintf("\n--- Scraped %s (%s) ---\n%s\n", platform, hit.URL, truncate(scraped.Markdown, 6000)))
 		}
 	}
 
@@ -144,10 +205,16 @@ Do not invent employers, degrees, or metrics not present in the input. Be precis
 	}
 
 	sourceURLs := make([]string, 0, len(sources))
+	seenSourceURL := map[string]bool{}
 	for _, s := range sources {
-		if s.URL != "" && s.Error == "" && shouldIncludeWebSource(profile, s.URL) {
-			sourceURLs = append(sourceURLs, s.URL)
+		if s.URL == "" || s.Error != "" || seenSourceURL[s.URL] {
+			continue
 		}
+		if !shouldIncludeWebSource(profile, s.URL) {
+			continue
+		}
+		seenSourceURL[s.URL] = true
+		sourceURLs = append(sourceURLs, s.URL)
 	}
 
 	insight := models.ProfileInsight{
@@ -261,25 +328,6 @@ func (a *Agent) resolvePublicEmail(ctx context.Context, profile *models.Profile)
 		return ""
 	}
 	return email
-}
-
-func enrichmentSearchQuery(profile *models.Profile, publicEmail string) string {
-	name := strings.TrimSpace(profile.DisplayName)
-	ghLogin := canonicalGitHubUsername(profile)
-	parts := []string{}
-	if ghLogin != "" {
-		parts = append(parts, fmt.Sprintf(`"github.com/%s"`, ghLogin))
-	}
-	if name != "" && ghLogin != "" {
-		parts = append(parts, fmt.Sprintf(`"%s"`, name))
-	}
-	if publicEmail != "" {
-		parts = append(parts, fmt.Sprintf(`"%s"`, publicEmail))
-	}
-	if len(parts) == 0 {
-		return fmt.Sprintf("%s %s developer", name, profile.Handle)
-	}
-	return strings.Join(parts, " ")
 }
 
 func stringsTitle(s string) string {

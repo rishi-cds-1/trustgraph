@@ -26,6 +26,7 @@ import { RecruiterModePanel } from "@/components/profile/RecruiterModePanel";
 import { profile as profileCopy, routes } from "@/constants";
 import { layout, links } from "@/constants/styles";
 import { api, PublicProfile } from "@/lib/api";
+import { deriveMercariValues } from "@/lib/mercariValues";
 
 type ProfilePageContentProps = {
   handle: string;
@@ -44,6 +45,12 @@ export function ProfilePageContent({
   const [buildPhase, setBuildPhase] = useState<"revealed" | "building">(initialBuildPhase);
   const [revealedStages, setRevealedStages] = useState<Set<number>>(new Set());
   const [activeStages, setActiveStages] = useState<Map<number, string>>(new Map());
+  // Whether this view should keep building itself from the web after first paint:
+  // a live preview (arrived from the hero) or any thin, unclaimed shadow passport.
+  const willKeepBuilding =
+    initialBuildPhase === "building" || (initialProfile.is_shadow && !initialProfile.is_claimed);
+  const [enriching, setEnriching] = useState(willKeepBuilding);
+  const buildStartedRef = useRef(false);
   const building = buildPhase === "building";
 
   const heroRef = useRef<HTMLDivElement>(null);
@@ -87,6 +94,40 @@ export function ProfilePageContent({
     };
   }, [isSignedIn, getToken, handle]);
 
+  // "Keep building" step: for a live preview (arrived from the hero) or any
+  // thin shadow passport, show the GitHub-only shell immediately, then run
+  // cross-site enrichment (LinkedIn, portfolio, blog, Stack Overflow, ...) in the
+  // background and fold the richer result in when it lands. Fires once; the
+  // backend cooldown keeps repeat visits from re-spending on external APIs.
+  useEffect(() => {
+    if (buildStartedRef.current || !willKeepBuilding) return;
+    buildStartedRef.current = true;
+
+    let cancelled = false;
+
+    async function keepBuilding() {
+      try {
+        const token = isSignedIn ? await getToken().catch(() => null) : null;
+        const next = await api.buildPassport(handle, token ?? undefined);
+        // Only adopt the enriched result if it didn't lose ground (e.g. a teaser
+        // response for a signed-in viewer) — never downgrade what's on screen.
+        if (!cancelled && next && next.evidence_count >= profile.evidence_count) {
+          setProfile(next);
+        }
+      } catch {
+        // best-effort — the GitHub passport already renders without this
+      } finally {
+        if (!cancelled) setEnriching(false);
+      }
+    }
+
+    void keepBuilding();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const isAuthenticatedView = profile.view_mode === "summary" || profile.view_mode === "full";
   const isFullView = profile.view_mode === "full";
   const isShadowUnclaimed = profile.is_shadow && !profile.is_claimed;
@@ -100,6 +141,8 @@ export function ProfilePageContent({
   );
 
   const hasTimeline = isAuthenticatedView && (profile.timeline?.length ?? 0) > 0;
+
+  const mercariValues = deriveMercariValues(profile);
 
   let stageCursor = 0;
   const heroStageIdx = stageCursor++;
@@ -120,6 +163,16 @@ export function ProfilePageContent({
   return (
     <main className={`${layout.page} relative pt-24 pb-10`}>
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-20" />
+
+      {enriching && (
+        <div className="fixed bottom-5 right-5 z-40 flex max-w-[19rem] items-center gap-2.5 rounded-full border border-mercari-red/30 bg-surface/95 px-3.5 py-2 text-xs font-medium text-[#111111] shadow-lg backdrop-blur">
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mercari-red opacity-70" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-mercari-red" />
+          </span>
+          Building passport — scanning the web for LinkedIn, portfolio &amp; more…
+        </div>
+      )}
 
       <Suspense fallback={null}>
         <PassportBuildFlag
@@ -170,6 +223,7 @@ export function ProfilePageContent({
               isOwner={Boolean(profile.is_owner)}
               loadingAuth={loadingAuth}
               showScoreBreakdown={hasDimensions || isAuthenticatedView}
+              mercariValues={mercariValues}
             />
           </BuildStage>
 

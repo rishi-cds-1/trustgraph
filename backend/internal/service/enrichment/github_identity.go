@@ -129,10 +129,23 @@ func writeIdentityCorpus(b *strings.Builder, profile *models.Profile, publicEmai
 	b.WriteString("TrustGraph handle: @" + profile.Handle + "\n")
 }
 
-func recruiterQueries(profile *models.Profile, publicEmail string) []string {
+// crossSiteQueries builds name-based web searches that fan out from the GitHub
+// identity to the rest of someone's public footprint — LinkedIn, a personal
+// portfolio/blog, Stack Overflow, Devpost, etc. It leans on whatever signals are
+// already on the profile (display name, canonical GitHub login, public email,
+// company, location) to disambiguate the person from homonyms.
+func crossSiteQueries(profile *models.Profile, publicEmail string) []string {
 	name := strings.TrimSpace(profile.DisplayName)
 	ghLogin := canonicalGitHubUsername(profile)
 	handle := strings.TrimSpace(profile.Handle)
+	company := strings.TrimSpace(profile.Company)
+	location := strings.TrimSpace(profile.Location)
+
+	// The strongest secondary signal to pin the name to (login beats handle).
+	anchor := ghLogin
+	if anchor == "" {
+		anchor = handle
+	}
 
 	var queries []string
 	if ghLogin != "" {
@@ -147,13 +160,25 @@ func recruiterQueries(profile *models.Profile, publicEmail string) []string {
 	if publicEmail != "" {
 		queries = append(queries, fmt.Sprintf(`"%s" developer`, publicEmail))
 	}
-	if name != "" && ghLogin != "" {
+	if name != "" {
+		// Disambiguate the name with the company first (most precise), then fall
+		// back to the GitHub anchor, and always fan out across the target sites.
+		if company != "" {
+			queries = append(queries,
+				fmt.Sprintf(`"%s" "%s" linkedin`, name, company),
+				fmt.Sprintf(`"%s" "%s"`, name, company),
+			)
+		}
 		queries = append(queries,
-			fmt.Sprintf(`"%s" %s linkedin`, name, ghLogin),
-			fmt.Sprintf(`"%s" %s devpost OR "stack overflow"`, name, ghLogin),
+			fmt.Sprintf(`"%s" %s linkedin`, name, anchor),
+			fmt.Sprintf(`"%s" %s (portfolio OR blog OR "personal website")`, name, anchor),
+			fmt.Sprintf(`"%s" %s ("stack overflow" OR devpost OR "dev.to")`, name, anchor),
 		)
-	} else if name != "" {
-		queries = append(queries, fmt.Sprintf(`"%s" %s linkedin software engineer`, name, handle))
+		if company == "" && location != "" {
+			queries = append(queries, fmt.Sprintf(`"%s" %s software engineer`, name, location))
+		}
+	} else if ghLogin != "" {
+		queries = append(queries, fmt.Sprintf(`%s developer linkedin`, ghLogin))
 	}
 
 	seen := map[string]bool{}
@@ -167,6 +192,13 @@ func recruiterQueries(profile *models.Profile, publicEmail string) []string {
 		unique = append(unique, q)
 	}
 	return unique
+}
+
+// recruiterQueries retains its name for the recruiter deep-search path but now
+// shares the cross-site query builder so both paths benefit from company/
+// location-aware, multi-site discovery.
+func recruiterQueries(profile *models.Profile, publicEmail string) []string {
+	return crossSiteQueries(profile, publicEmail)
 }
 
 func sanitizeInsightText(profile *models.Profile, insight *models.ProfileInsight) {
