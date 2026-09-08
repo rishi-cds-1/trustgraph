@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Show } from "@clerk/nextjs";
 import { useGSAP } from "@gsap/react";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Files, Globe, Timer, Users } from "lucide-react";
@@ -321,13 +322,26 @@ export function Hero() {
           </p>
 
           <div className="hero-cta mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href={routes.onboarding}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_0_22px_rgba(255,255,255,0.32),0_0_44px_rgba(255,2,17,0.12)] transition hover:-translate-y-0.5 hover:scale-[1.02]"
-            >
-              {heroContent.primaryCta}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            {/* Logged out → invite them to claim their (as-yet unclaimed) passport.
+                Logged in → send them to their dashboard. */}
+            <Show when="signed-out">
+              <Link
+                href={routes.signUp}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_0_22px_rgba(255,255,255,0.32),0_0_44px_rgba(255,2,17,0.12)] transition hover:-translate-y-0.5 hover:scale-[1.02]"
+              >
+                {heroContent.claimCta}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Show>
+            <Show when="signed-in">
+              <Link
+                href={routes.dashboard}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_0_22px_rgba(255,255,255,0.32),0_0_44px_rgba(255,2,17,0.12)] transition hover:-translate-y-0.5 hover:scale-[1.02]"
+              >
+                {heroContent.dashboardCta}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Show>
             <Link
               href={routes.sampleProfile("rishicds")}
               className="inline-flex items-center rounded-full border border-white/25 bg-white/5 px-7 py-3 text-sm font-medium text-white transition hover:bg-white/10"

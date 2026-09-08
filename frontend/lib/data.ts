@@ -23,7 +23,8 @@ export const heroContent = {
   titleLine1: "Turn your work",
   titleLine2: "into proof.",
   subhead: "Evidence over resumes. Signal over noise.",
-  primaryCta: "Analyze a GitHub profile",
+  claimCta: "Claim this profile",
+  dashboardCta: "Go to your dashboard",
   secondaryCta: "View sample evidence brief",
   proofLine: "Public sources only. Analysis requires consent. AI organizes evidence; people make decisions.",
 };
