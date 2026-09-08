@@ -28,6 +28,13 @@ const NAMES: Record<MercariValueKey, string> = {
   "move-fast": "Move Fast",
 };
 
+// Curated per-handle overrides: force a value to always show earned (with an
+// optional custom reason), regardless of the derived heuristics. Keyed by
+// lowercased handle.
+const FORCED_VALUES: Record<string, Partial<Record<MercariValueKey, string>>> = {
+  rishicds: { "be-a-pro": "Peer-verified engineering depth" },
+};
+
 function statMatching(stats: ProfileStat[], ...needles: string[]): ProfileStat | undefined {
   return stats.find((s) => {
     const hay = `${s.key} ${s.label}`.toLowerCase();
@@ -113,13 +120,18 @@ export function deriveMercariValues(profile: PublicProfile): MercariValue[] {
       : "A broad, ambitious body of work";
   const goBold = buildsAtHackathons || caps.length >= 4;
 
-  const make = (key: MercariValueKey, earned: boolean, reason: string): MercariValue => ({
-    key,
-    name: NAMES[key],
-    tagline: TAGLINES[key],
-    earned,
-    reason,
-  });
+  const forced = FORCED_VALUES[(profile.handle ?? "").toLowerCase()] ?? {};
+
+  const make = (key: MercariValueKey, earned: boolean, reason: string): MercariValue => {
+    const forcedReason = forced[key];
+    return {
+      key,
+      name: NAMES[key],
+      tagline: TAGLINES[key],
+      earned: earned || forcedReason !== undefined,
+      reason: forcedReason ?? reason,
+    };
+  };
 
   return [
     make("go-bold", goBold, goBoldReason),
