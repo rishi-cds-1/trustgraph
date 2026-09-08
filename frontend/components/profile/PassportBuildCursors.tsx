@@ -12,9 +12,12 @@ export type BuildTargetStage = {
 
 type ActiveStage = { index: number; label: string };
 
-const TRAVEL_MS = 700;
-const DWELL_MS = 850;
-const GAP_MS = 150;
+const MIN_TOTAL_MS = 5200;
+const MAX_TOTAL_MS = 7800;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
 
 const CURSOR_A_COLORS = {
   ring: "border-accent/50",
@@ -30,15 +33,26 @@ const CURSOR_B_COLORS = {
   dotShadow: "shadow-[0_0_16px_3px_rgba(56,189,248,0.55)]",
 };
 
-function actionLabelFor(sectionLabel: string): string {
-  const map: Record<string, string> = {
-    "Passport hero": "Verifying identity & headline…",
-    Stats: "Tallying verified stats…",
-    "AI insight synthesis": "Synthesizing AI insight…",
-    Capabilities: "Mapping capabilities…",
-    "Evidence timeline": "Assembling evidence timeline…",
-  };
-  return map[sectionLabel] ?? `Placing ${sectionLabel.toLowerCase()}…`;
+// Cursor A reads as "working the GitHub side"; cursor B reads as "searching the
+// wider web." Each list's final entry is the section's real action name.
+const CURSOR_A_SUBLABELS: Record<string, string[]> = {
+  "Passport hero": ["Connecting to GitHub…", "Verifying identity & headline…"],
+  Stats: ["Reading public repositories…", "Tallying verified stats…"],
+  "AI insight synthesis": ["Scanning commit history…", "Synthesizing AI insight…"],
+  Capabilities: ["Parsing repo languages…", "Mapping capabilities…"],
+  "Evidence timeline": ["Walking the contribution graph…", "Assembling evidence timeline…"],
+};
+
+const CURSOR_B_SUBLABELS: Record<string, string[]> = {
+  "Passport hero": ["Searching the web…", "Verifying identity & headline…"],
+  Stats: ["Cross-referencing LinkedIn…", "Tallying verified stats…"],
+  "AI insight synthesis": ["Checking Stack Overflow…", "Synthesizing AI insight…"],
+  Capabilities: ["Searching public mentions…", "Mapping capabilities…"],
+  "Evidence timeline": ["Indexing evidence sources…", "Assembling evidence timeline…"],
+};
+
+function subLabelsFor(map: Record<string, string[]>, sectionLabel: string): string[] {
+  return map[sectionLabel] ?? ["Searching for evidence…", `Placing ${sectionLabel.toLowerCase()}…`];
 }
 
 export function PassportBuildCursors({
@@ -56,6 +70,8 @@ export function PassportBuildCursors({
 }) {
   const [cursorAIndex, setCursorAIndex] = useState<number | null>(null);
   const [cursorBIndex, setCursorBIndex] = useState<number | null>(null);
+  const [subLabelA, setSubLabelA] = useState<string | null>(null);
+  const [subLabelB, setSubLabelB] = useState<string | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const revealedCount = useRef(0);
   const finishedCursors = useRef(0);
@@ -64,14 +80,20 @@ export function PassportBuildCursors({
   useEffect(() => {
     const active: ActiveStage[] = [];
     if (cursorAIndex !== null) {
-      active.push({ index: cursorAIndex, label: actionLabelFor(stages[cursorAIndex].label) });
+      active.push({
+        index: cursorAIndex,
+        label: subLabelA ?? subLabelsFor(CURSOR_A_SUBLABELS, stages[cursorAIndex].label)[0],
+      });
     }
     if (cursorBIndex !== null) {
-      active.push({ index: cursorBIndex, label: actionLabelFor(stages[cursorBIndex].label) });
+      active.push({
+        index: cursorBIndex,
+        label: subLabelB ?? subLabelsFor(CURSOR_B_SUBLABELS, stages[cursorBIndex].label)[0],
+      });
     }
     onActiveChange(active);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cursorAIndex, cursorBIndex]);
+  }, [cursorAIndex, cursorBIndex, subLabelA, subLabelB]);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -86,6 +108,13 @@ export function PassportBuildCursors({
     const listA = stages.map((_, i) => i).filter((i) => i % 2 === 0);
     const listB = stages.map((_, i) => i).filter((i) => i % 2 === 1);
 
+    const totalTargetMs = MIN_TOTAL_MS + Math.random() * (MAX_TOTAL_MS - MIN_TOTAL_MS);
+    const longerLen = Math.max(listA.length, listB.length, 1);
+    const perStepMs = totalTargetMs / longerLen;
+    const travelMs = clamp(perStepMs * 0.28, 450, 900);
+    const gapMs = clamp(perStepMs * 0.08, 100, 220);
+    const dwellMs = Math.max(perStepMs - travelMs - gapMs, 900);
+
     function finishCursor() {
       finishedCursors.current += 1;
       if (finishedCursors.current >= 2 && !done.current) {
@@ -94,17 +123,36 @@ export function PassportBuildCursors({
       }
     }
 
-    function runList(list: number[], setIndex: (i: number | null) => void) {
+    function runList(
+      list: number[],
+      setIndex: (i: number | null) => void,
+      setSubLabel: (label: string | null) => void,
+      subLabelMap: Record<string, string[]>,
+    ) {
       let pos = 0;
       function step() {
         if (cancelled) return;
         if (pos >= list.length) {
           setIndex(null);
+          setSubLabel(null);
           finishCursor();
           return;
         }
         const idx = list[pos];
         setIndex(idx);
+        const subLabels = subLabelsFor(subLabelMap, stages[idx].label);
+        setSubLabel(subLabels[0]);
+
+        const perSub = dwellMs / subLabels.length;
+        subLabels.forEach((text, i) => {
+          if (i === 0) return;
+          timeouts.push(
+            setTimeout(() => {
+              if (!cancelled) setSubLabel(text);
+            }, travelMs + i * perSub),
+          );
+        });
+
         timeouts.push(
           setTimeout(() => {
             if (cancelled) return;
@@ -115,16 +163,16 @@ export function PassportBuildCursors({
               gsap.to(progressRef.current, { width: `${pct}%`, duration: 0.4, ease: "power2.out" });
             }
             pos += 1;
-            timeouts.push(setTimeout(step, GAP_MS));
-          }, TRAVEL_MS + DWELL_MS),
+            timeouts.push(setTimeout(step, gapMs));
+          }, travelMs + dwellMs),
         );
       }
       step();
     }
 
-    if (listA.length > 0) runList(listA, setCursorAIndex);
+    if (listA.length > 0) runList(listA, setCursorAIndex, setSubLabelA, CURSOR_A_SUBLABELS);
     else finishCursor();
-    if (listB.length > 0) runList(listB, setCursorBIndex);
+    if (listB.length > 0) runList(listB, setCursorBIndex, setSubLabelB, CURSOR_B_SUBLABELS);
     else finishCursor();
 
     return () => {
@@ -150,11 +198,19 @@ export function PassportBuildCursors({
       </div>
 
       <AgentCursor
-        stage={stageA ? { label: actionLabelFor(stageA.label), targetRef: stageA.ref } : null}
+        stage={
+          stageA
+            ? { label: subLabelA ?? subLabelsFor(CURSOR_A_SUBLABELS, stageA.label)[0], targetRef: stageA.ref }
+            : null
+        }
         colors={CURSOR_A_COLORS}
       />
       <AgentCursor
-        stage={stageB ? { label: actionLabelFor(stageB.label), targetRef: stageB.ref } : null}
+        stage={
+          stageB
+            ? { label: subLabelB ?? subLabelsFor(CURSOR_B_SUBLABELS, stageB.label)[0], targetRef: stageB.ref }
+            : null
+        }
         colors={CURSOR_B_COLORS}
       />
     </>

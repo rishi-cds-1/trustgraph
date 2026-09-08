@@ -226,6 +226,9 @@ func (a *API) Me(w http.ResponseWriter, r *http.Request) {
 func (a *API) GetProfile(w http.ResponseWriter, r *http.Request) {
 	handle := strings.TrimSpace(strings.ToLower(r.PathValue("handle")))
 	profile, err := a.store.FindProfileByHandle(r.Context(), handle)
+	if err == repository.ErrNotFound {
+		profile, err = a.createShadowProfileFromGitHub(r.Context(), handle)
+	}
 	if err != nil {
 		writeError(w, http.StatusNotFound, "profile not found")
 		return

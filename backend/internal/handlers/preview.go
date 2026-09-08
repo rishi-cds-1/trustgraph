@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -86,6 +87,22 @@ func (a *API) PreviewGitHub(w http.ResponseWriter, r *http.Request) {
 		"invite_url":        frontend + "/sign-up?claim=" + profile.Handle,
 		"github_url":        "https://github.com/" + stats.User.Login,
 	})
+}
+
+// createShadowProfileFromGitHub fetches a GitHub user live and materializes a
+// shadow profile for them if one doesn't already exist. Returns
+// repository.ErrNotFound if no such GitHub user exists.
+func (a *API) createShadowProfileFromGitHub(ctx context.Context, handle string) (*models.Profile, error) {
+	stats, err := a.github.FetchStats(ctx, handle)
+	if err != nil {
+		return nil, repository.ErrNotFound
+	}
+	profile := profilesync.BuildShadowProfile(handle, stats)
+	a.applySupplementalEvidence(ctx, profile)
+	if err := a.store.UpsertProfileByHandle(ctx, profile); err != nil {
+		return nil, err
+	}
+	return profile, nil
 }
 
 func previewHighlights(evidence []models.EvidenceItem) []string {
