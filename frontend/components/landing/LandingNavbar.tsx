@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Network } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { LandingAuthNav } from "@/components/landing/LandingAuthNav";
-import { routes } from "@/constants";
+import { brand, routes } from "@/constants";
 import { navLinks } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
@@ -38,11 +37,14 @@ export function LandingNavbar() {
       >
         <Link
           href={routes.home}
-          aria-label="TrustGraph home"
-          className="grid shrink-0 place-items-center rounded-full bg-white shadow-[var(--nav-shadow)] transition-transform hover:scale-[1.04]"
-          style={{ width: "clamp(40px, 4.4vw, 46px)", height: "clamp(40px, 4.4vw, 46px)" }}
+          aria-label={`${brand.name} home`}
+          className="flex shrink-0 items-center rounded-full bg-white px-4 font-semibold tracking-tight text-[#111111] shadow-[var(--nav-shadow)] transition-transform hover:scale-[1.03]"
+          style={{
+            height: "clamp(40px, 4.4vw, 46px)",
+            fontSize: "clamp(14px, 1.7vw, 16px)",
+          }}
         >
-          <Network className="h-[72%] w-[72%] text-[#111111]" strokeWidth={1.75} />
+          {brand.name}
         </Link>
 
         <nav

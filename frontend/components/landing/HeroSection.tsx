@@ -157,8 +157,8 @@ function StatItem({ stat, index }: { stat: LandingStat; index: number }) {
 export function Hero() {
   return (
     <section className="hero-section relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-black">
-      <HeroVideoBackground className="opacity-40" />
-      <div className="pointer-events-none absolute inset-0 bg-black/60" />
+      <HeroVideoBackground className="opacity-80" />
+      <div className="pointer-events-none absolute inset-0 bg-black/35" />
 
       <div className="relative z-10 mx-auto flex w-full min-w-0 max-w-3xl flex-1 flex-col items-center justify-center px-4 pb-8 pt-24 text-center sm:px-6 sm:pt-28">
         <div
