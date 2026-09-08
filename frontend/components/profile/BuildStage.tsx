@@ -8,33 +8,39 @@ import { cn } from "@/lib/utils";
 
 type BuildStageProps = {
   children: React.ReactNode;
-  building: boolean;
+  revealed: boolean;
   label: string;
+  active?: boolean;
+  activeLabel?: string | null;
   className?: string;
 };
 
 export const BuildStage = forwardRef<HTMLDivElement, BuildStageProps>(function BuildStage(
-  { children, building, label, className },
+  { children, revealed, label, active, activeLabel, className },
   ref,
 ) {
-  const wasBuilding = useRef(building);
+  const wasRevealed = useRef(revealed);
 
   useEffect(() => {
     const el = typeof ref === "function" ? null : ref?.current;
     if (!el) return;
-    if (wasBuilding.current && !building) {
-      gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" });
+    if (!wasRevealed.current && revealed) {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
+      );
     }
-    wasBuilding.current = building;
+    wasRevealed.current = revealed;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [building]);
+  }, [revealed]);
 
   return (
     <div ref={ref} className={cn("relative", className)}>
-      <div className={building ? "pointer-events-none opacity-0" : ""}>{children}</div>
-      {building && (
+      <div className={revealed ? "" : "pointer-events-none opacity-0"}>{children}</div>
+      {!revealed && (
         <div className="absolute inset-0">
-          <SkeletonBlock label={label} className="h-full" />
+          <SkeletonBlock label={label} active={active} activeLabel={activeLabel} className="h-full" />
         </div>
       )}
     </div>

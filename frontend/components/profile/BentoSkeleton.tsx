@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { gsap } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
@@ -32,16 +32,58 @@ export function ShimmerBar({ className }: { className?: string }) {
   );
 }
 
-export function SkeletonBlock({ label, className }: { label: string; className?: string }) {
+function TypingLine({ text }: { text: string }) {
+  const [shown, setShown] = useState("");
+
+  useEffect(() => {
+    setShown("");
+    let i = 0;
+    const id = setInterval(() => {
+      i += 1;
+      setShown(text.slice(0, i));
+      if (i >= text.length) clearInterval(id);
+    }, 22);
+    return () => clearInterval(id);
+  }, [text]);
+
   return (
-    <div className={cn("border border-border bg-white p-3 md:p-4", className)}>
+    <p className="mt-4 flex items-center text-[10px] font-medium uppercase tracking-wide text-teal">
+      {shown}
+      <span className="ml-0.5 inline-block h-2.5 w-1 animate-pulse bg-teal" />
+    </p>
+  );
+}
+
+export function SkeletonBlock({
+  label,
+  active,
+  activeLabel,
+  className,
+}: {
+  label: string;
+  active?: boolean;
+  activeLabel?: string | null;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "border bg-white p-3 transition-colors duration-300 md:p-4",
+        active ? "border-teal/50 shadow-[0_0_0_1px_rgba(15,110,104,0.15)]" : "border-border",
+        className,
+      )}
+    >
       <ShimmerBar className="mb-3 h-2 w-28" />
       <div className="space-y-2">
         <ShimmerBar className="h-2.5 w-full" />
         <ShimmerBar className="h-2.5 w-5/6" />
         <ShimmerBar className="h-2.5 w-2/3" />
       </div>
-      <p className="mt-4 text-[10px] font-medium uppercase tracking-wide text-muted">{label}</p>
+      {active && activeLabel ? (
+        <TypingLine text={activeLabel} />
+      ) : (
+        <p className="mt-4 text-[10px] font-medium uppercase tracking-wide text-muted">{label}</p>
+      )}
     </div>
   );
 }

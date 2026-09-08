@@ -6,7 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 
 import { BuildStage } from "@/components/profile/BuildStage";
 import { EvidenceList } from "@/components/profile/EvidenceList";
-import { PassportBuildCursors } from "@/components/profile/PassportBuildCursors";
+import { PassportBuildCursors, type BuildTargetStage } from "@/components/profile/PassportBuildCursors";
 import { PassportBuildFlag } from "@/components/profile/PassportBuildFlag";
 import { ProUpsellBanner } from "@/components/profile/ProUpsellBanner";
 import {
@@ -30,13 +30,20 @@ import { api, PublicProfile } from "@/lib/api";
 type ProfilePageContentProps = {
   handle: string;
   initialProfile: PublicProfile;
+  initialBuildPhase?: "revealed" | "building";
 };
 
-export function ProfilePageContent({ handle, initialProfile }: ProfilePageContentProps) {
+export function ProfilePageContent({
+  handle,
+  initialProfile,
+  initialBuildPhase = "revealed",
+}: ProfilePageContentProps) {
   const { isSignedIn, getToken } = useAuth();
   const [profile, setProfile] = useState(initialProfile);
   const [loadingAuth, setLoadingAuth] = useState(false);
-  const [buildPhase, setBuildPhase] = useState<"revealed" | "building">("revealed");
+  const [buildPhase, setBuildPhase] = useState<"revealed" | "building">(initialBuildPhase);
+  const [revealedStages, setRevealedStages] = useState<Set<number>>(new Set());
+  const [activeStages, setActiveStages] = useState<Map<number, string>>(new Map());
   const building = buildPhase === "building";
 
   const heroRef = useRef<HTMLDivElement>(null);
@@ -93,30 +100,57 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
   );
 
   const hasTimeline = isAuthenticatedView && (profile.timeline?.length ?? 0) > 0;
-  const stageRefs = [heroRef, capabilitiesRef];
-  if (stats.length > 0) stageRefs.push(statsRef);
-  if (profile.ai_insight) stageRefs.push(insightRef);
-  if (hasTimeline) stageRefs.push(timelineRef);
+
+  let stageCursor = 0;
+  const heroStageIdx = stageCursor++;
+  const statsStageIdx = stats.length > 0 ? stageCursor++ : -1;
+  const insightStageIdx = profile.ai_insight ? stageCursor++ : -1;
+  const capabilitiesStageIdx = stageCursor++;
+  const timelineStageIdx = hasTimeline ? stageCursor++ : -1;
+
+  const buildStages: BuildTargetStage[] = [{ ref: heroRef, label: "Passport hero" }];
+  if (statsStageIdx >= 0) buildStages.push({ ref: statsRef, label: "Stats" });
+  if (insightStageIdx >= 0) buildStages.push({ ref: insightRef, label: "AI insight synthesis" });
+  buildStages.push({ ref: capabilitiesRef, label: "Capabilities" });
+  if (timelineStageIdx >= 0) buildStages.push({ ref: timelineRef, label: "Evidence timeline" });
+
+  const isStageRevealed = (idx: number) => !building || revealedStages.has(idx);
+  const stageActiveLabel = (idx: number) => (building ? activeStages.get(idx) : undefined);
 
   return (
     <main className={`${layout.page} relative pt-24 pb-10`}>
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-20" />
 
       <Suspense fallback={null}>
-        <PassportBuildFlag onBuilt={() => setBuildPhase("building")} />
+        <PassportBuildFlag
+          onBuilt={() => {
+            setRevealedStages(new Set());
+            setActiveStages(new Map());
+            setBuildPhase("building");
+          }}
+        />
       </Suspense>
 
       {building && (
         <PassportBuildCursors
-          refs={stageRefs}
+          stages={buildStages}
           displayName={profile.display_name}
+          onStageRevealed={(idx) => setRevealedStages((prev) => new Set(prev).add(idx))}
+          onActiveChange={(active) => setActiveStages(new Map(active.map((a) => [a.index, a.label])))}
           onComplete={() => setBuildPhase("revealed")}
         />
       )}
 
       <div className="relative mx-auto max-w-6xl px-4 md:px-5">
         <ProfileBentoGrid>
-          <BuildStage ref={heroRef} building={building} label="Passport hero" className="col-span-12">
+          <BuildStage
+            ref={heroRef}
+            revealed={isStageRevealed(heroStageIdx)}
+            active={Boolean(stageActiveLabel(heroStageIdx))}
+            activeLabel={stageActiveLabel(heroStageIdx)}
+            label="Passport hero"
+            className="col-span-12"
+          >
             <ProfileBentoHero
               handle={profile.handle}
               displayName={profile.display_name}
@@ -140,7 +174,14 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
           </BuildStage>
 
           {stats.length > 0 && (
-            <BuildStage ref={statsRef} building={building} label="Stats" className="col-span-12">
+            <BuildStage
+              ref={statsRef}
+              revealed={isStageRevealed(statsStageIdx)}
+              active={Boolean(stageActiveLabel(statsStageIdx))}
+              activeLabel={stageActiveLabel(statsStageIdx)}
+              label="Stats"
+              className="col-span-12"
+            >
               <BentoBlock className="col-span-12">
                 <ProfileStatsGrid stats={stats} embedded />
               </BentoBlock>
@@ -150,7 +191,9 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
           {profile.ai_insight && (
             <BuildStage
               ref={insightRef}
-              building={building}
+              revealed={isStageRevealed(insightStageIdx)}
+              active={Boolean(stageActiveLabel(insightStageIdx))}
+              activeLabel={stageActiveLabel(insightStageIdx)}
               label="AI insight synthesis"
               className="col-span-12 md:col-span-7"
             >
@@ -162,7 +205,9 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
 
           <BuildStage
             ref={capabilitiesRef}
-            building={building}
+            revealed={isStageRevealed(capabilitiesStageIdx)}
+            active={Boolean(stageActiveLabel(capabilitiesStageIdx))}
+            activeLabel={stageActiveLabel(capabilitiesStageIdx)}
             label="Capabilities"
             className="col-span-12 md:col-span-5"
           >
@@ -198,7 +243,14 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
           {!isAuthenticatedView && <BentoTeaserCta handle={profile.handle} />}
 
           {hasTimeline && profile.timeline && (
-            <BuildStage ref={timelineRef} building={building} label="Evidence timeline" className="col-span-12">
+            <BuildStage
+              ref={timelineRef}
+              revealed={isStageRevealed(timelineStageIdx)}
+              active={Boolean(stageActiveLabel(timelineStageIdx))}
+              activeLabel={stageActiveLabel(timelineStageIdx)}
+              label="Evidence timeline"
+              className="col-span-12"
+            >
               <BentoTimeline events={profile.timeline} />
             </BuildStage>
           )}

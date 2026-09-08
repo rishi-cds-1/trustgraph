@@ -8,6 +8,7 @@ import { buildProfileFallbackMetadata, buildProfileMetadata } from "@/lib/profil
 
 type PageProps = {
   params: Promise<{ handle: string }>;
+  searchParams: Promise<{ built?: string }>;
 };
 
 export async function generateMetadata({ params }: PageProps) {
@@ -20,8 +21,9 @@ export async function generateMetadata({ params }: PageProps) {
   }
 }
 
-export default async function ProfilePage({ params }: PageProps) {
+export default async function ProfilePage({ params, searchParams }: PageProps) {
   const { handle } = await params;
+  const { built } = await searchParams;
 
   if (reservedHandles.has(handle.toLowerCase())) {
     notFound();
@@ -37,7 +39,11 @@ export default async function ProfilePage({ params }: PageProps) {
   return (
     <>
       <Navbar />
-      <ProfilePageContent handle={handle} initialProfile={initialProfile} />
+      <ProfilePageContent
+        handle={handle}
+        initialProfile={initialProfile}
+        initialBuildPhase={built === "1" ? "building" : "revealed"}
+      />
       <Footer />
     </>
   );

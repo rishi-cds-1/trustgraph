@@ -5,22 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import { AgentCursor } from "@/components/onboarding/AgentCursor";
 import { gsap } from "@/lib/gsap";
 
-type StageRef = React.RefObject<HTMLElement | null>;
+export type BuildTargetStage = {
+  ref: React.RefObject<HTMLElement | null>;
+  label: string;
+};
 
-const CURSOR_A_STAGES = [
-  "Reading GitHub repositories…",
-  "Verifying commit history…",
-  "Compiling capabilities…",
-];
+type ActiveStage = { index: number; label: string };
 
-const CURSOR_B_STAGES = [
-  "Cross-referencing LinkedIn…",
-  "Scanning Stack Overflow activity…",
-  "Assembling evidence timeline…",
-];
-
-const STAGE_INTERVAL_MS = 1500;
-const TOTAL_STAGES = Math.max(CURSOR_A_STAGES.length, CURSOR_B_STAGES.length);
+const TRAVEL_MS = 700;
+const DWELL_MS = 850;
+const GAP_MS = 150;
 
 const CURSOR_A_COLORS = {
   ring: "border-accent/50",
@@ -36,62 +30,112 @@ const CURSOR_B_COLORS = {
   dotShadow: "shadow-[0_0_16px_3px_rgba(56,189,248,0.55)]",
 };
 
-function pickRef(refs: StageRef[], index: number): StageRef | null {
-  if (refs.length === 0) return null;
-  return refs[index % refs.length];
+function actionLabelFor(sectionLabel: string): string {
+  const map: Record<string, string> = {
+    "Passport hero": "Verifying identity & headline…",
+    Stats: "Tallying verified stats…",
+    "AI insight synthesis": "Synthesizing AI insight…",
+    Capabilities: "Mapping capabilities…",
+    "Evidence timeline": "Assembling evidence timeline…",
+  };
+  return map[sectionLabel] ?? `Placing ${sectionLabel.toLowerCase()}…`;
 }
 
 export function PassportBuildCursors({
-  refs,
+  stages,
   displayName,
+  onStageRevealed,
+  onActiveChange,
   onComplete,
 }: {
-  refs: StageRef[];
+  stages: BuildTargetStage[];
   displayName: string;
+  onStageRevealed: (index: number) => void;
+  onActiveChange: (active: ActiveStage[]) => void;
   onComplete: () => void;
 }) {
-  const [stageIndex, setStageIndex] = useState(0);
+  const [cursorAIndex, setCursorAIndex] = useState<number | null>(null);
+  const [cursorBIndex, setCursorBIndex] = useState<number | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const revealedCount = useRef(0);
+  const finishedCursors = useRef(0);
   const done = useRef(false);
 
   useEffect(() => {
+    const active: ActiveStage[] = [];
+    if (cursorAIndex !== null) {
+      active.push({ index: cursorAIndex, label: actionLabelFor(stages[cursorAIndex].label) });
+    }
+    if (cursorBIndex !== null) {
+      active.push({ index: cursorBIndex, label: actionLabelFor(stages[cursorBIndex].label) });
+    }
+    onActiveChange(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cursorAIndex, cursorBIndex]);
+
+  useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) {
-      onComplete();
-      return;
-    }
-    if (refs.length === 0) {
+    if (reduceMotion || stages.length === 0) {
+      stages.forEach((_, i) => onStageRevealed(i));
       onComplete();
       return;
     }
 
-    const id = setInterval(() => {
-      setStageIndex((i) => {
-        const next = i + 1;
-        if (next >= TOTAL_STAGES) {
-          clearInterval(id);
-          if (!done.current) {
-            done.current = true;
-            onComplete();
-          }
-          return i;
+    let cancelled = false;
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    const listA = stages.map((_, i) => i).filter((i) => i % 2 === 0);
+    const listB = stages.map((_, i) => i).filter((i) => i % 2 === 1);
+
+    function finishCursor() {
+      finishedCursors.current += 1;
+      if (finishedCursors.current >= 2 && !done.current) {
+        done.current = true;
+        onComplete();
+      }
+    }
+
+    function runList(list: number[], setIndex: (i: number | null) => void) {
+      let pos = 0;
+      function step() {
+        if (cancelled) return;
+        if (pos >= list.length) {
+          setIndex(null);
+          finishCursor();
+          return;
         }
-        return next;
-      });
-    }, STAGE_INTERVAL_MS);
+        const idx = list[pos];
+        setIndex(idx);
+        timeouts.push(
+          setTimeout(() => {
+            if (cancelled) return;
+            onStageRevealed(idx);
+            revealedCount.current += 1;
+            if (progressRef.current) {
+              const pct = Math.min((revealedCount.current / stages.length) * 100, 100);
+              gsap.to(progressRef.current, { width: `${pct}%`, duration: 0.4, ease: "power2.out" });
+            }
+            pos += 1;
+            timeouts.push(setTimeout(step, GAP_MS));
+          }, TRAVEL_MS + DWELL_MS),
+        );
+      }
+      step();
+    }
 
-    return () => clearInterval(id);
+    if (listA.length > 0) runList(listA, setCursorAIndex);
+    else finishCursor();
+    if (listB.length > 0) runList(listB, setCursorBIndex);
+    else finishCursor();
+
+    return () => {
+      cancelled = true;
+      timeouts.forEach(clearTimeout);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!progressRef.current) return;
-    const pct = Math.min(((stageIndex + 1) / TOTAL_STAGES) * 100, 100);
-    gsap.to(progressRef.current, { width: `${pct}%`, duration: 0.5, ease: "power2.out" });
-  }, [stageIndex]);
-
-  const targetA = pickRef(refs, stageIndex * 2);
-  const targetB = pickRef(refs, stageIndex * 2 + 1);
+  const stageA = cursorAIndex !== null ? stages[cursorAIndex] : null;
+  const stageB = cursorBIndex !== null ? stages[cursorBIndex] : null;
 
   return (
     <>
@@ -106,19 +150,11 @@ export function PassportBuildCursors({
       </div>
 
       <AgentCursor
-        stage={
-          targetA
-            ? { label: CURSOR_A_STAGES[stageIndex % CURSOR_A_STAGES.length], targetRef: targetA }
-            : null
-        }
+        stage={stageA ? { label: actionLabelFor(stageA.label), targetRef: stageA.ref } : null}
         colors={CURSOR_A_COLORS}
       />
       <AgentCursor
-        stage={
-          targetB
-            ? { label: CURSOR_B_STAGES[stageIndex % CURSOR_B_STAGES.length], targetRef: targetB }
-            : null
-        }
+        stage={stageB ? { label: actionLabelFor(stageB.label), targetRef: stageB.ref } : null}
         colors={CURSOR_B_COLORS}
       />
     </>
