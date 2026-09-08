@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 
+import { BuildStage } from "@/components/profile/BuildStage";
 import { EvidenceList } from "@/components/profile/EvidenceList";
+import { PassportBuildCursors } from "@/components/profile/PassportBuildCursors";
+import { PassportBuildFlag } from "@/components/profile/PassportBuildFlag";
 import { ProUpsellBanner } from "@/components/profile/ProUpsellBanner";
 import {
   BentoBlock,
@@ -33,6 +36,14 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
   const { isSignedIn, getToken } = useAuth();
   const [profile, setProfile] = useState(initialProfile);
   const [loadingAuth, setLoadingAuth] = useState(false);
+  const [buildPhase, setBuildPhase] = useState<"revealed" | "building">("revealed");
+  const building = buildPhase === "building";
+
+  const heroRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const insightRef = useRef<HTMLDivElement>(null);
+  const capabilitiesRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -81,49 +92,85 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
         profile.trust_score.dimensions.consistency > 0),
   );
 
+  const hasTimeline = isAuthenticatedView && (profile.timeline?.length ?? 0) > 0;
+  const stageRefs = [heroRef, capabilitiesRef];
+  if (stats.length > 0) stageRefs.push(statsRef);
+  if (profile.ai_insight) stageRefs.push(insightRef);
+  if (hasTimeline) stageRefs.push(timelineRef);
+
   return (
     <main className={`${layout.page} relative pt-24 pb-10`}>
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-20" />
 
+      <Suspense fallback={null}>
+        <PassportBuildFlag onBuilt={() => setBuildPhase("building")} />
+      </Suspense>
+
+      {building && (
+        <PassportBuildCursors
+          refs={stageRefs}
+          displayName={profile.display_name}
+          onComplete={() => setBuildPhase("revealed")}
+        />
+      )}
+
       <div className="relative mx-auto max-w-6xl px-4 md:px-5">
         <ProfileBentoGrid>
-          <ProfileBentoHero
-            handle={profile.handle}
-            displayName={profile.display_name}
-            headline={profile.headline}
-            avatarUrl={profile.avatar_url}
-            trustScore={profile.trust_score}
-            evidenceCount={profile.evidence_count}
-            topCapability={profile.capabilities[0]?.name}
-            summary={profile.ai_insight?.summary}
-            roleSignals={profile.ai_insight?.role_signals}
-            socialLinks={socialLinks}
-            githubPublicEmail={profile.github_public_email}
-            company={profile.company}
-            location={profile.location}
-            isShadowUnclaimed={isShadowUnclaimed}
-            isAuthenticatedView={isAuthenticatedView}
-            isOwner={Boolean(profile.is_owner)}
-            loadingAuth={loadingAuth}
-            showScoreBreakdown={hasDimensions || isAuthenticatedView}
-          />
+          <BuildStage ref={heroRef} building={building} label="Passport hero" className="col-span-12">
+            <ProfileBentoHero
+              handle={profile.handle}
+              displayName={profile.display_name}
+              headline={profile.headline}
+              avatarUrl={profile.avatar_url}
+              trustScore={profile.trust_score}
+              evidenceCount={profile.evidence_count}
+              topCapability={profile.capabilities[0]?.name}
+              summary={profile.ai_insight?.summary}
+              roleSignals={profile.ai_insight?.role_signals}
+              socialLinks={socialLinks}
+              githubPublicEmail={profile.github_public_email}
+              company={profile.company}
+              location={profile.location}
+              isShadowUnclaimed={isShadowUnclaimed}
+              isAuthenticatedView={isAuthenticatedView}
+              isOwner={Boolean(profile.is_owner)}
+              loadingAuth={loadingAuth}
+              showScoreBreakdown={hasDimensions || isAuthenticatedView}
+            />
+          </BuildStage>
 
           {stats.length > 0 && (
-            <BentoBlock className="col-span-12">
-              <ProfileStatsGrid stats={stats} embedded />
-            </BentoBlock>
+            <BuildStage ref={statsRef} building={building} label="Stats" className="col-span-12">
+              <BentoBlock className="col-span-12">
+                <ProfileStatsGrid stats={stats} embedded />
+              </BentoBlock>
+            </BuildStage>
           )}
 
           {profile.ai_insight && (
-            <BentoBlock className="col-span-12 md:col-span-7">
-              <ProfileAIInsights insight={profile.ai_insight} embedded highlightsOnly />
-            </BentoBlock>
+            <BuildStage
+              ref={insightRef}
+              building={building}
+              label="AI insight synthesis"
+              className="col-span-12 md:col-span-7"
+            >
+              <BentoBlock className="col-span-12 md:col-span-7">
+                <ProfileAIInsights insight={profile.ai_insight} embedded highlightsOnly />
+              </BentoBlock>
+            </BuildStage>
           )}
 
-          <BentoCapabilities
-            capabilities={profile.capabilities}
-            roleSignals={profile.ai_insight?.role_signals}
-          />
+          <BuildStage
+            ref={capabilitiesRef}
+            building={building}
+            label="Capabilities"
+            className="col-span-12 md:col-span-5"
+          >
+            <BentoCapabilities
+              capabilities={profile.capabilities}
+              roleSignals={profile.ai_insight?.role_signals}
+            />
+          </BuildStage>
 
           {isAuthenticatedView && !profile.is_owner && (
             <BentoBlock className="col-span-12">
@@ -150,8 +197,10 @@ export function ProfilePageContent({ handle, initialProfile }: ProfilePageConten
 
           {!isAuthenticatedView && <BentoTeaserCta handle={profile.handle} />}
 
-          {isAuthenticatedView && profile.timeline && profile.timeline.length > 0 && (
-            <BentoTimeline events={profile.timeline} />
+          {hasTimeline && profile.timeline && (
+            <BuildStage ref={timelineRef} building={building} label="Evidence timeline" className="col-span-12">
+              <BentoTimeline events={profile.timeline} />
+            </BuildStage>
           )}
 
           {isFullView && profile.insights && profile.insights.length > 0 && (

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import {
   ArrowRight,
@@ -53,11 +54,11 @@ export function HeroGitHubPreview() {
   const { hero } = landing;
   const { lookup } = hero;
   const defaultHandle = hero.defaultPreviewHandle ?? "rishicds";
+  const router = useRouter();
 
   const [username, setUsername] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [bootLoading, setBootLoading] = useState(true);
-  const [error, setError] = useState("");
   const [preview, setPreview] = useState<GitHubPreview | null>(null);
   const [copied, setCopied] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -86,7 +87,7 @@ export function HeroGitHubPreview() {
     void loadSample();
   }, [defaultHandle]);
 
-  async function handleLookup(e?: FormEvent) {
+  function handleLookup(e?: FormEvent) {
     e?.preventDefault();
     let query = username.trim();
     if (!query) return;
@@ -97,16 +98,8 @@ export function HeroGitHubPreview() {
       query = urlMatch[1];
     }
 
-    setLoading(true);
-    setError("");
-    try {
-      const result = await api.previewGitHub(query);
-      setPreview(result);
-    } catch {
-      setError(lookup.error);
-    } finally {
-      setLoading(false);
-    }
+    setSubmitting(true);
+    router.push(`${routes.sampleProfile(query)}?built=1`);
   }
 
   function copyInvite() {
@@ -130,7 +123,7 @@ export function HeroGitHubPreview() {
   }
 
   const signals = preview ? trustSignals(preview) : [];
-  const showInvite = preview && !loading && !bootLoading;
+  const showInvite = preview && !bootLoading;
 
   return (
     <div className="mx-auto w-full min-w-0 text-left">
@@ -163,14 +156,14 @@ export function HeroGitHubPreview() {
           />
           <button
             type="submit"
-            disabled={loading || !username.trim()}
+            disabled={submitting || !username.trim()}
             className={cn(
               "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent text-black shadow-[0_4px_14px_rgba(123,225,59,0.35)] transition md:h-14 md:w-14 md:rounded-2xl",
               "hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none",
             )}
             aria-label={lookup.button}
           >
-            {loading ? (
+            {submitting ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <ArrowRight className="h-5 w-5" />
@@ -179,16 +172,7 @@ export function HeroGitHubPreview() {
         </div>
       </form>
 
-      {error && <p className="mt-3 text-center text-sm text-red-400">{error}</p>}
-
-      {loading && (
-        <p className="mt-4 flex items-center justify-center gap-2 text-sm text-white/50">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {lookup.loading}
-        </p>
-      )}
-
-      {(bootLoading || (preview && !loading)) && (
+      {(bootLoading || preview) && (
         <div
           className={cn(
             "hero-search-card relative z-10 mt-5 overflow-hidden rounded-2xl p-5 md:p-6",
